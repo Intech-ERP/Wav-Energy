@@ -1,5 +1,15 @@
 const leads = require("../models/leadGenerate.model");
 
+const formatDate = (date) => {
+  if (!date) return null;
+
+  return new Date(date).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+
 exports.generateLead = async (req, res) => {
   try {
     const data = req.body;
@@ -30,9 +40,15 @@ exports.generateLead = async (req, res) => {
 exports.getLeads = async (req, res) => {
   try {
     const result = await leads.find({ status: 1 }, { _id: 0 }).lean();
+
+    const formattedData = result.map((item) => ({
+      ...item,
+      created_date: formatDate(item.created_date),
+      updated_date: formatDate(item.updated_date),
+    }));
     res.status(200).json({
       success: true,
-      data: result,
+      data: formattedData,
     });
   } catch (error) {
     res.status(400).json({ success: true, message: error.message });

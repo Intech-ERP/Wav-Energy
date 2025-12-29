@@ -1,16 +1,33 @@
 // const customerModel = require("../models/customer.model");
 const customers = require("../models/customer.model");
 
+const formatDate = (date) => {
+  if (!date) return null;
+
+  return new Date(date).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+
 exports.addCustomer = async (req, res) => {
   try {
     const payload = req.body;
 
     console.log("data", payload);
 
-    const isExistingCustomer = await customers.findOne({ company_id: payload.company_id }, { status: 1 }).lean();
+    const isExistingCustomer = await customers
+      .findOne({ company_id: payload.company_id }, { status: 1 })
+      .lean();
 
     if (isExistingCustomer) {
-      return res.status(200).json({ success: true, message:'Lead Generate For Existing Customer'});
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "Lead Generate For Existing Customer",
+        });
     }
 
     let phoneNumbers;
@@ -63,9 +80,15 @@ exports.getCustomer = async (req, res) => {
       .find({ status: 1 }, { _id: 0 })
       .lean();
 
+    const formattedData = customersData.map((item) => ({
+      ...item,
+      created_date: formatDate(item.created_date),
+      updated_date: formatDate(item.updated_date),
+    }));
+
     res.status(200).json({
       success: true,
-      data: customersData,
+      data: formattedData,
     });
   } catch (error) {
     res.status(500).json({
