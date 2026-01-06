@@ -19,12 +19,22 @@ const AvatarStyle = {
 };
 
 const Header = ({ sidebarOpen }) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const initial = user?.user.slice(0, 1).toUpperCase();
   const menuItems = [
-    { label: "Cold Call", path: "/cold-call" },
     { label: "Lead", path: "/lead" },
+    { label: "Enquiry", path: "/enquiry" },
     { label: "Address Book", path: "/address-book" },
     { label: "Lead Master", path: "/lead-master" },
+    { label: "Report", path: "/report" },
+    { label: "User Rights", path: "/user-rights" },
   ];
+
+  const allowedMenus = menuItems.filter((item) =>
+    user?.menu?.some(
+      (m) => m.name === item.label && ["show", "full"].includes(m.access)
+    )
+  );
 
   const containerStyle = {
     borderRight: "1px solid #e9e9e9",
@@ -48,19 +58,19 @@ const Header = ({ sidebarOpen }) => {
           }}
         >
           <Avatar sx={AvatarStyle}>
-            <Typography variant="body2">V</Typography>
+            <Typography variant="body2">{initial}</Typography>
           </Avatar>
 
           <Box>
-            <Typography variant="body1">userName</Typography>
+            <Typography variant="body1">{user.user}</Typography>
             <Typography variant="body2" color="text.secondary">
-              Emp: 103
+              Emp:{user.emp_id}
             </Typography>
           </Box>
         </Box>
 
         <List sx={{ p: 0 }}>
-          {menuItems.map((item) => (
+          {allowedMenus.map((item) => (
             <ListItem key={item.path} disablePadding>
               <ListItemButton
                 component={NavLink}

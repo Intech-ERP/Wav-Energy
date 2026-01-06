@@ -7,9 +7,9 @@ export const EnquiryForm = [
     required: true,
   },
   { label: "Mobile No", name: "mobile_no", type: "number", required: true },
-  { label: "Email ID", name: "email_id", type: "email", required: true },
+  { label: "Email ID", name: "email_id", type: "email", required: false },
   { label: "Address", name: "address", type: "multiline", required: true },
-  { label: "Website", name: "website", type: "text", required: true },
+  { label: "Website", name: "website", type: "text", required: false },
   {
     label: "Next Followup Date",
     name: "next_followup_date",

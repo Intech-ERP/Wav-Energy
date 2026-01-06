@@ -2,7 +2,7 @@ import { Box } from "@mui/system";
 import React, { useEffect, useState } from "react";
 import Table from "../Common/Table";
 import { useFetchData } from "../../Hooks/useFetchData";
-import { formatDate } from "../ColdCall/coldCall";
+import { formatDate } from "../Lead/Lead";
 import { Button, IconButton, TextField } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -20,6 +20,11 @@ const Advisory = ({ tabValue, refreshKey, onEditData }) => {
   const [tableData, setTableData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteRow, setDeleteRow] = useState([]);
+
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const permission = user?.menu?.find((item) => item.name === "Lead Master");
+  const hasFullAccess = permission?.access === "full";
 
   const updateDisplayOrder = async (dispValue, row) => {
     try {
@@ -97,13 +102,13 @@ const Advisory = ({ tabValue, refreshKey, onEditData }) => {
       header: "Display Order",
       enableGlobalFilter: true,
       Cell: ({ row }) => {
+        if (!hasFullAccess) {
+          return row.original.disp_order ?? "";
+        }
+
         const rowId = row.index;
         const tableValue = row.original.disp_order ?? 0;
         const displayValue = editDispValue[rowId] ?? tableValue;
-
-        console.table("rowId", rowId);
-
-        console.table("displayValue");
 
         const handleChange = (e) => {
           const value = e.target.value;
@@ -111,7 +116,6 @@ const Advisory = ({ tabValue, refreshKey, onEditData }) => {
             ...prev,
             [rowId]: value,
           }));
-          console.log("dispValue", editDispValue);
         };
 
         const handleBlur = () => {
@@ -135,30 +139,34 @@ const Advisory = ({ tabValue, refreshKey, onEditData }) => {
     },
     { id: 3, accessorKey: "created_date", header: "Created Date" },
     { id: 4, accessorKey: "updated_date", header: "Modified Date" },
-    {
-      id: 5,
-      accessorKey: "action",
-      header: "Action",
-      Cell: ({ row }) => (
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <IconButton
-            size="small"
-            color="primary"
-            onClick={() => handleEditData(row.original)}
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
+    ...(hasFullAccess
+      ? [
+          {
+            id: 5,
+            accessorKey: "action",
+            header: "Action",
+            Cell: ({ row }) => (
+              <Box sx={{ display: "flex", gap: 1 }}>
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={() => handleEditData(row.original)}
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
 
-          <IconButton
-            size="small"
-            color="error"
-            onClick={() => handleDelete(row.original)}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Box>
-      ),
-    },
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={() => handleDelete(row.original)}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            ),
+          },
+        ]
+      : []),
   ];
 
   useEffect(() => {

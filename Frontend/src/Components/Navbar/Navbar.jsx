@@ -13,10 +13,13 @@ import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
 import React, { useState } from "react";
 import Header from "./Header";
 import { useNavigate } from "react-router-dom";
+import { removeToken } from "../../utils/token";
 
 const Navbar = ({ sidebarOpen, setSidebar }) => {
   const navigate = useNavigate();
   const handleLogout = () => {
+    localStorage.removeItem("user");
+    removeToken();
     navigate("/login");
   };
   return (

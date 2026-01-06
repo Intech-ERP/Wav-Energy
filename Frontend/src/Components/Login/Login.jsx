@@ -37,8 +37,8 @@ const Login = () => {
     }
     if (!loginData.password) {
       newErrors.password = "Password is required";
-    } else if (loginData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+    } else if (loginData.password.length < 4) {
+      newErrors.password = "Password must be at least 4 characters";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -47,12 +47,12 @@ const Login = () => {
   const handleLogin = async () => {
     if (!validate()) return;
     try {
-      // const user = await login(loginData);
+      const user = await login(loginData);
 
       //save user info
-      // localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("user", JSON.stringify(user));
       showSuccess("Login successful!");
-      navigate("/cold-call");
+      navigate("/lead");
     } catch (error) {
       showError("Login failed. username or password is inValid.");
       console.error("Login failed:", error);

@@ -69,7 +69,7 @@ export const leadForm = [
     label: "Address Line 2",
     name: "address_line_2",
     type: "text",
-    required: true,
+    required: false,
   },
   {
     label: "Address Line 3",
@@ -88,19 +88,19 @@ export const leadForm = [
     name: "country",
     type: "select",
     required: true,
-    options: ["India", "USA"],
+    options: ["India"],
   },
   {
     label: "State",
     name: "state",
     type: "select",
     required: true,
-    options: ["Tamil Nadu", "Kerala", "Karnataka"],
+    // options: ["Tamil Nadu", "Kerala", "Karnataka"],
   },
   {
     label: "Pincode",
     name: "pincode",
-    type: "text",
+    type: "number",
     required: true,
   },
   {

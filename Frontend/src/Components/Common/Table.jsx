@@ -21,7 +21,35 @@ const Table = ({
             enableSorting={enableSorting}
             enableColumnFilters={enableColumnFilters}
             enableGlobalFilter={enableGlobalFilter}
-            muiTableContainerProps={{ sx: { width: "100%" } }}
+            muiTableContainerProps={{
+              sx: {
+                width: "100%",
+                border: "1px solid #e0e0e0",
+                // borderRadius: "8px",
+                // boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+              },
+            }}
+            muiTableProps={{
+              sx: {
+                "& .MuiTableCell-root": {
+                  fontSize: "0.95rem",
+                  padding: "12px",
+                },
+              },
+            }}
+            muiTableHeadCellProps={{
+              sx: {
+                backgroundColor: "#f5f5f5",
+                fontWeight: "bold",
+                // fontSize: "1rem",
+                // borderBottom: "2px solid #d0d0d0",
+              },
+            }}
+            muiTableBodyCellProps={{
+              sx: {
+                // borderBottom: "1px solid #e0e0e0",
+              },
+            }}
           />
         </Box>
       </Box>

@@ -2,7 +2,7 @@ export const contactForm = [
   { label: "Name", name: "name", type: "text", required: true },
   { label: "Designation", name: "designation", type: "text", required: true },
   { label: "Department", name: "department", type: "text", required: true },
-  { label: "Mailer", name: "mailer", type: "text", required: false },
+  // { label: "Mailer", name: "mailer", type: "text", required: false },
   {
     label: "Personal Mobile No",
     name: "mobile_no1",

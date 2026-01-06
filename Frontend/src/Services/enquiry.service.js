@@ -1,38 +1,47 @@
 import server from "./server";
 
-export const addEnquiry = async (payload) => {
+export const addLeads = async (payload) => {
   try {
-    const res = await server.post("/enquiries", payload);
+    const res = await server.post("/leads", payload);
     return res.data;
   } catch (error) {
     console.error("Error Adding enquiry", error);
   }
 };
 
-export const updateEnquiry = async (id, payload) => {
-  console.log("updateEnquiry payload", id, payload);
+export const updateLead = async (id, payload) => {
+  console.log("updateLead payload", id, payload);
   try {
-    const res = await server.put(`/enquiries/${id}`, payload);
+    const res = await server.put(`/leads/${id}`, payload);
     return res.data;
   } catch (error) {
     console.error("Error Updating enquiry", error);
   }
 };
 
-export const convertToLead = async (id) => {
+export const convertToEnquiry = async (id) => {
   try {
-    const res = await server.put(`/convertLead/${id}`);
+    const res = await server.put(`/convertEnquiry/${id}`);
     return res.data;
   } catch (error) {
     console.error("Error Convert to Lead", error);
   }
 };
 
-export const convertedEnquiry = async () => {
+export const convertedLeads = async () => {
   try {
-    const res = await server.get("/convertedEnquiry");
+    const res = await server.get("/convertedLead");
     return res.data;
   } catch (error) {
-    console.error("Error Getting Converted Enquiries", error);
+    console.error("Error Getting Converted Leads", error);
+  }
+};
+
+export const removeConvertedLead = async (id) => {
+  try {
+    const res = await server.put(`/removeConvertedLead/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error Getting Removing Enquiry", error);
   }
 };

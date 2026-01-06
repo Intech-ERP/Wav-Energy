@@ -6,7 +6,6 @@ function formatDateToIST(date) {
 
 const customerSchema = new mongoose.Schema({
   company_id: { type: Number, default: "" },
-  vendor_code: { type: Number },
   company_name: { type: String, default: "" },
   group_name: { type: String, default: "" },
   alias_name: { type: String, default: "" },

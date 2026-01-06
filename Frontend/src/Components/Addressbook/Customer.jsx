@@ -21,21 +21,23 @@ import {
   useForm,
   useFieldArray,
   useFormState,
+  useWatch,
 } from "react-hook-form";
 import Contact from "./Contact";
 import { addCustomer, updateCustomer } from "../../Services/customer.service";
 import toast, { Toaster } from "react-hot-toast";
 import { showError, showSuccess } from "../../Services/alert";
 import { useFetchCompanyId } from "../../Hooks/useFetchCompanyId";
+import { State as IndiaState } from "country-state-city";
 
 const formFields = [
   { lable: "Company ID", type: "number", name: "company_id", require: true },
-  {
-    lable: "Vendor code",
-    type: "number",
-    name: "vendor_code",
-    require: true,
-  },
+  // {
+  //   lable: "Vendor code",
+  //   type: "number",
+  //   name: "vendor_code",
+  //   require: true,
+  // },
   {
     lable: "Company Name",
     type: "text",
@@ -106,7 +108,7 @@ const formFields = [
     lable: "Address Line 2",
     type: "text",
     name: "address_line_2",
-    require: true,
+    require: false,
   },
   {
     lable: "Address Line 3",
@@ -228,6 +230,7 @@ export const Header = ({ isEditMode }) => {
 const Customer = () => {
   const [contact, setContact] = useState(false);
   const [customerData, setCustomerData] = useState([]);
+  const [states, setStates] = useState([]);
   const contactRef = useRef(null);
   const navigate = useNavigate();
 
@@ -247,6 +250,11 @@ const Customer = () => {
   const { fields, append, remove } = useFieldArray({
     control,
     name: "phone_no",
+  });
+
+  const country = useWatch({
+    control,
+    name: "country",
   });
 
   const handleOpenContact = () => {
@@ -288,6 +296,13 @@ const Customer = () => {
       });
     }
   }, [isEditMode, editData, reset]);
+
+  useEffect(() => {
+    if (country === "India") {
+      const indiaStates = IndiaState.getStatesOfCountry("IN");
+      setStates(indiaStates);
+    }
+  }, [country]);
 
   const handleSubmitData = async (data) => {
     try {
@@ -424,7 +439,6 @@ const Customer = () => {
                             >
                               <MenuItem value="">-- Select --</MenuItem>
                               <MenuItem value="India">India</MenuItem>
-                              <MenuItem value="USA">USA</MenuItem>
                             </TextField>
                           )}
                         />
@@ -443,11 +457,22 @@ const Customer = () => {
                               fullWidth
                               error={!!fieldState.error}
                               helperText={fieldState.error?.message}
+                              SelectProps={{
+                                MenuProps: {
+                                  PaperProps: {
+                                    style: {
+                                      maxHeight: 190,
+                                    },
+                                  },
+                                },
+                              }}
                             >
                               <MenuItem value="">-- Select --</MenuItem>
-                              <MenuItem value="Tamil Nadu">Tamil Nadu</MenuItem>
-                              <MenuItem value="Karnataka">Karnataka</MenuItem>
-                              <MenuItem value="Kerala">Kerala</MenuItem>
+                              {states.map((state) => (
+                                <MenuItem value={state.name} key={state.name}>
+                                  {state.name}
+                                </MenuItem>
+                              ))}
                             </TextField>
                           )}
                         />

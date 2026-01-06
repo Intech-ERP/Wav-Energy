@@ -5,9 +5,10 @@ import { setToken } from "../utils/token";
 export const login = async (credentials) => {
   const response = await server.post("/login", credentials);
 
-  const { accessToken, user } = response.data;
+  const { token, safeUser } = response.data;
 
-  setToken(accessToken);
+  console.log("Accesd Token", token);
 
-  return user;
+  setToken(token);
+  return safeUser;
 };

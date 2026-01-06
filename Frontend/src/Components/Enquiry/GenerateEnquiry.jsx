@@ -18,8 +18,9 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { useFetchData } from "../../Hooks/useFetchData";
 import { getContactsById } from "../../Services/contact.service";
 import { showError } from "../../Services/alert";
+import { State } from "country-state-city";
 
-export const Header = ({ isEditMode, isConvertToLead }) => {
+export const Header = ({ isEditMode, isConvertToEnquiry }) => {
   return (
     <>
       <Box
@@ -35,7 +36,7 @@ export const Header = ({ isEditMode, isConvertToLead }) => {
         >
           <Link
             component={RouterLink}
-            to="/lead"
+            to="/enquiry"
             sx={{
               color: "#0072BC",
               fontWeight: 400,
@@ -58,7 +59,7 @@ export const Header = ({ isEditMode, isConvertToLead }) => {
                 fontSize: "18px",
               }}
             >
-              Lead
+              Enquiry
             </Typography>
           </Link>
           <Typography
@@ -69,10 +70,10 @@ export const Header = ({ isEditMode, isConvertToLead }) => {
             }}
           >
             {isEditMode
-              ? "Edit Generated Lead"
-              : isConvertToLead
-              ? "Convert To Lead"
-              : " Generate Lead"}
+              ? "Edit Enquiry"
+              : isConvertToEnquiry
+              ? "Convert To Enquiry"
+              : " Generate Enquiry"}
           </Typography>
         </Breadcrumbs>
       </Box>
@@ -80,20 +81,23 @@ export const Header = ({ isEditMode, isConvertToLead }) => {
   );
 };
 
-const LeadGenerate = () => {
+const GenerateEnquiry = () => {
   const navigate = useNavigate();
   const [isNewCustomer, setIsNewCustomer] = useState(false);
   const [contactPerson, setContactPerson] = useState([]);
   const [isNewContactPerson, setIsNewContactPerson] = useState(false);
+  const [states, setStates] = useState([]);
   const { data = [] } = useFetchData("/customers");
 
   const { state } = useLocation();
 
   const editData = state?.editData;
-  const convertLeadData = state?.convertLead;
+  const convertLeadData = state?.convertEnquiry;
 
   const isEditMode = Boolean(editData);
-  const isConvertToLead = Boolean(convertLeadData);
+  const isConvertToEnquiry = Boolean(convertLeadData);
+
+  console.log("editData", editData);
 
   const convertToLeads = useMemo(() => {
     if (!Array.isArray(convertLeadData)) return;
@@ -132,15 +136,21 @@ const LeadGenerate = () => {
     }));
   }, [data]);
 
-  const { control, handleSubmit, setValue, reset, clearErrors } = useForm({
+  const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
       company_id: "",
     },
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 
   const contactPersonValue = useWatch({
     control,
     name: "contact_person",
+  });
+  const country = useWatch({
+    control,
+    name: "country",
   });
 
   const fetchContactPersons = async (companyId) => {
@@ -196,7 +206,17 @@ const LeadGenerate = () => {
         shouldTouch: false,
         shouldValidate: false,
       });
-    } else if (isConvertToLead) {
+      // setValue("mobile_no", editData.mobile, {
+      //   shouldDirty: false,
+      //   shouldTouch: false,
+      //   shouldValidate: false,
+      // });
+      // setValue("company_details", editData.company_details, {
+      //   shouldDirty: false,
+      //   shouldTouch: false,
+      //   shouldValidate: false,
+      // });
+    } else if (isConvertToEnquiry) {
       const firstLead = convertToLeads[0];
       setValue("company_name", firstLead.company_name, {
         shouldDirty: false,
@@ -234,7 +254,14 @@ const LeadGenerate = () => {
         shouldValidate: false,
       });
     }
-  }, [isEditMode, isConvertToLead]);
+  }, [isEditMode, isConvertToEnquiry]);
+
+  useEffect(() => {
+    if (country === "India") {
+      const indiaStates = State.getStatesOfCountry("IN");
+      setStates(indiaStates);
+    }
+  }, [country]);
 
   const handleSubmitData = (data) => {
     const navigationState = {
@@ -243,7 +270,7 @@ const LeadGenerate = () => {
     if (editData) {
       navigationState.editData = editData;
     }
-    if (isConvertToLead && convertToLeads?.[0]) {
+    if (isConvertToEnquiry && convertToLeads?.[0]) {
       navigationState.convertLead = convertToLeads[0];
     }
     console.log("data", navigationState);
@@ -251,7 +278,7 @@ const LeadGenerate = () => {
   };
   return (
     <>
-      <Header isEditMode={isEditMode} isConvertToLead={isConvertToLead} />
+      <Header isEditMode={isEditMode} isConvertToEnquiry={isConvertToEnquiry} />
       <Box sx={{ mt: 2, background: "#fff", p: 2 }}>
         <Box component={"form"} onSubmit={handleSubmit(handleSubmitData)}>
           <Grid
@@ -448,7 +475,7 @@ const LeadGenerate = () => {
                           />
                         )}
                       />
-                    ) : field.type === "select" ? (
+                    ) : field.type === "select" && field.name === "country" ? (
                       <Controller
                         name={field.name}
                         control={control}
@@ -481,7 +508,7 @@ const LeadGenerate = () => {
                           );
                         }}
                       />
-                    ) : (
+                    ) : field.name === "state" ? (
                       <Controller
                         name={field.name}
                         control={control}
@@ -491,50 +518,129 @@ const LeadGenerate = () => {
                             : false,
                         }}
                         render={({ field: controllerField, fieldState }) => {
-                          const isNumber = field.type === "number";
-                          const isTextarea = field.type === "textarea";
+                          return (
+                            <TextField
+                              {...controllerField}
+                              size="small"
+                              fullWidth
+                              select
+                              value={controllerField.value ?? ""}
+                              error={!!fieldState.error}
+                              helperText={fieldState.error?.message}
+                              SelectProps={{
+                                MenuProps: {
+                                  PaperProps: {
+                                    style: {
+                                      maxHeight: 250,
+                                    },
+                                  },
+                                },
+                              }}
+                            >
+                              <MenuItem value="" disabled>
+                                -- Select --
+                              </MenuItem>
+
+                              {states?.map((option) => (
+                                <MenuItem key={option.name} value={option.name}>
+                                  {option.name}
+                                </MenuItem>
+                              ))}
+                            </TextField>
+                          );
+                        }}
+                      />
+                    ) : field.name === "mobile_no" ? (
+                      <Controller
+                        name={field.name}
+                        control={control}
+                        rules={{
+                          required: field.required
+                            ? `${field.label} is required`
+                            : false,
+                          validate: (value) =>
+                            value.length === 10 ||
+                            "Only 10-digit numbers are allowed",
+                        }}
+                        render={({ field: controllerField, fieldState }) => {
+                          // const isNumber = field.type === "number";
+                          // const isTextarea = field.type === "textarea";
 
                           return (
                             <TextField
                               {...controllerField}
                               size="small"
                               fullWidth
-                              // select={isSelect}
-                              multiline={isTextarea}
-                              rows={isTextarea ? field.rows || 3 : 1}
-                              type={isNumber ? "number" : "text"}
-                              value={controllerField.value ?? ""}
+                              type="number"
+                              inputProps={{
+                                inputMode: "numeric",
+                                maxLength: 10,
+                                pattern: "[0-9]*",
+                              }}
+                              value={controllerField.value ?? null}
                               error={!!fieldState.error}
                               helperText={fieldState.error?.message}
                               onChange={(e) => {
                                 let value = e.target.value;
 
-                                if (isNumber) {
-                                  value = value === "" ? "" : Number(value);
-                                }
+                                // if (isNumber) {
+                                //   value = value === "" ? "" : Number(value);
+                                // }
 
-                                console.log(field.name, "new value:", value);
+                                console.log(
+                                  "fieldState",
+                                  !!fieldState.error,
+                                  fieldState.error?.message
+                                );
 
                                 controllerField.onChange(value);
                               }}
-                            >
-                              {/* {isSelect && (
-                                <>
-                                  <MenuItem value="" disabled>
-                                    -- Select --
-                                  </MenuItem>
-
-                                  {field.options?.map((option) => (
-                                    <MenuItem key={option} value={option}>
-                                      {option}
-                                    </MenuItem>
-                                  ))}
-                                </>
-                              )} */}
-                            </TextField>
+                            ></TextField>
                           );
                         }}
                       />
+                    ) : (
+                      field.name !== "mobile_no" && (
+                        <Controller
+                          name={field.name}
+                          control={control}
+                          rules={{
+                            required: field.required
+                              ? `${field.label} is required`
+                              : false,
+                          }}
+                          render={({ field: controllerField, fieldState }) => {
+                            const isNumber = field.type === "number";
+                            const isTextarea = field.type === "textarea";
+
+                            return (
+                              <TextField
+                                {...controllerField}
+                                size="small"
+                                fullWidth
+                                // select={isSelect}
+                                multiline={isTextarea}
+                                rows={isTextarea ? field.rows || 3 : 1}
+                                type={isNumber ? "number" : "text"}
+                                value={controllerField.value ?? ""}
+                                error={!!fieldState.error}
+                                helperText={fieldState.error?.message}
+                                onChange={(e) => {
+                                  let value = e.target.value;
+
+                                  if (isNumber) {
+                                    value = value === "" ? "" : Number(value);
+                                  }
+
+                                  console.log(field.name, "new value:", value);
+
+                                  controllerField.onChange(value);
+                                }}
+                              ></TextField>
+                            );
+                          }}
+                        />
+                      )
                     )}
                   </FormControl>
                 </Grid>
@@ -560,4 +666,4 @@ const LeadGenerate = () => {
   );
 };
 
-export default LeadGenerate;
+export default GenerateEnquiry;

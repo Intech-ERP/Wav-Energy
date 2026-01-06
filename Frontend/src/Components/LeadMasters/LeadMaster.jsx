@@ -15,6 +15,10 @@ const tablist = [
 ];
 
 export const Header = ({ tabValue, handleAddData }) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const permission = user?.menu?.find((item) => item.name === "Lead Master");
+  const hasFullAccess = permission?.access === "full";
   return (
     <>
       <Box
@@ -38,17 +42,19 @@ export const Header = ({ tabValue, handleAddData }) => {
             Lead Master
           </Typography>
         </Breadcrumbs>
-        <Box>
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<AddCircleOutlinedIcon />}
-            sx={{ borderRadius: 0, textTransform: "none" }}
-            onClick={handleAddData}
-          >
-            Add {tabValue}
-          </Button>
-        </Box>
+        {hasFullAccess && (
+          <Box>
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<AddCircleOutlinedIcon />}
+              sx={{ borderRadius: 0, textTransform: "none" }}
+              onClick={handleAddData}
+            >
+              Add {tabValue}
+            </Button>
+          </Box>
+        )}
       </Box>
     </>
   );
@@ -60,13 +66,13 @@ const LeadMaster = () => {
   const [editData, setEditData] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const column = [
-    { id: 1, accessorKey: "company_name", header: "Customer Name" },
-    { id: 2, accessorKey: "alias_name", header: "Alias Name" },
-    { id: 3, accessorKey: "pincode", header: "Pincode" },
-    { id: 4, accessorKey: "created_date", header: "Created Date" },
-    { id: 5, accessorKey: "modified_date", header: "Modified Date" },
-  ];
+  // const column = [
+  //   { id: 1, accessorKey: "company_name", header: "Customer Name" },
+  //   { id: 2, accessorKey: "alias_name", header: "Alias Name" },
+  //   { id: 3, accessorKey: "pincode", header: "Pincode" },
+  //   { id: 4, accessorKey: "created_date", header: "Created Date" },
+  //   { id: 5, accessorKey: "modified_date", header: "Modified Date" },
+  // ];
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);

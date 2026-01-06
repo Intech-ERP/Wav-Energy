@@ -11,6 +11,11 @@ const formatDate = (date) => {
   });
 };
 
+function convertToMongoDate(dateStr) {
+  const [day, month, year] = dateStr?.split("/");
+  return new Date(`${year}-${month}-${day}T00:00:00.000Z`);
+}
+
 exports.addCustomer = async (req, res) => {
   try {
     const payload = req.body;
@@ -22,13 +27,29 @@ exports.addCustomer = async (req, res) => {
       .lean();
 
     if (isExistingCustomer) {
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "Lead Generate For Existing Customer",
-        });
+      return res.status(200).json({
+        success: true,
+        message: "Lead Generate For Existing Customer",
+      });
     }
+
+    const isExistingCompany = await customers
+      .findOne(
+        {
+          company_name: payload.company_name,
+        },
+        { status: 1 }
+      )
+      .lean();
+
+    console.log("existing customer", isExistingCompany);
+
+    // if (isExistingCompany.length > 0) {
+    //   return res.status(200).json({
+    //     success: true,
+    //     message: "Company Already Exist",
+    //   });
+    // }
 
     let phoneNumbers;
 
@@ -41,7 +62,6 @@ exports.addCustomer = async (req, res) => {
     }
 
     const result = await new customers({
-      vendor_code: payload.vendor_code,
       company_name: payload.company_name,
       group_name: payload.group_name,
       alias_name: payload.alias_name,
@@ -135,12 +155,16 @@ exports.updateCustomer = async (req, res) => {
       ? req.body.phone_no.map((item) => item.value)
       : [];
 
+    const { created_date, ...rest } = req.body;
+
     const updatedCustomer = await customers.findOneAndUpdate(
       { company_id: Number(id) },
       {
         $set: {
-          ...req.body,
+          ...rest,
           phone_no: phoneNumbers ? phoneNumbers : [req.body.mobile_no],
+          // created_date: convertToMongoDate(req.body?.created_date),
+          updated_date: new Date(),
         },
       },
       {

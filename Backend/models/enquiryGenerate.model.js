@@ -5,23 +5,27 @@ function formatDateToIST(date) {
   return new Date(date.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
 }
 
-const enquirySchema = new Schema({
-  enquiry_id: { type: Number, default: "" },
+const enquiryGenerationSchema = new Schema({
+  enquiry_id: { type: Number },
   company_name: { type: String, default: "" },
   contact_person: { type: String, default: "" },
   mobile: { type: String, default: "" },
-  email: { type: String, default: "" },
-  address: { type: String, default: "" },
-  website: { type: String, default: "" },
-  next_followup_date: { type: Date },
-  last_followup_date: { type: Date },
+  enquiry_type: { type: String, default: "" },
+  sub_type: { type: String, default: "" },
+  advisory: { type: String, default: "" },
+  execution: { type: String, default: "" },
+  operation_Maintenance: { type: String, default: "" },
+  lead_source: { type: String, default: "" },
+  action: { type: String, default: "" },
   company_details: { type: String, default: "" },
-  status: { type: Number, default: 2 },
+  last_followup_date: { type: Date, default: new Date() },
+  next_followup_date: { type: Date, default: "" },
+  status: { type: Number, default: 1 },
   created_date: { type: Date, default: Date.now },
   updated_date: { type: Date, default: Date.now },
 });
 
-enquirySchema.pre("save", async function (next) {
+enquiryGenerationSchema.pre("save", async function (next) {
   if (!this.isNew) {
     this.updated_date = formatDateToIST(new Date());
     return next();
@@ -49,4 +53,4 @@ enquirySchema.pre("save", async function (next) {
   }
 });
 
-module.exports = mongoose.model("enquiries", enquirySchema);
+module.exports = mongoose.model("enquiries", enquiryGenerationSchema);

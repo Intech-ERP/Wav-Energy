@@ -20,6 +20,11 @@ const Execution = ({ tabValue, onEditData, refreshKey }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteRow, setDeleteRow] = useState([]);
 
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const permission = user?.menu?.find((item) => item.name === "Lead Master");
+  const hasFullAccess = permission?.access === "full";
+
   const updateDisplayOrder = async (dispValue, row) => {
     try {
       const newValue = parseInt(dispValue, 10);
@@ -107,6 +112,9 @@ const Execution = ({ tabValue, onEditData, refreshKey }) => {
       header: "Display Order",
       enableGlobalFilter: true,
       Cell: ({ row }) => {
+        if (!hasFullAccess) {
+          return row.original.disp_order ?? "";
+        }
         const rowId = row.index;
         const tableValue = row.original.disp_order ?? 0;
         const displayValue = editDispValue[rowId] ?? tableValue;
@@ -145,30 +153,34 @@ const Execution = ({ tabValue, onEditData, refreshKey }) => {
     },
     { id: 3, accessorKey: "created_date", header: "Created Date" },
     { id: 4, accessorKey: "updated_date", header: "Modified Date" },
-    {
-      id: 5,
-      accessorKey: "action",
-      header: "Action",
-      Cell: ({ row }) => (
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <IconButton
-            size="small"
-            color="primary"
-            onClick={() => handleEditData(row.original)}
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
+    ...(hasFullAccess
+      ? [
+          {
+            id: 5,
+            accessorKey: "action",
+            header: "Action",
+            Cell: ({ row }) => (
+              <Box sx={{ display: "flex", gap: 1 }}>
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={() => handleEditData(row.original)}
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
 
-          <IconButton
-            size="small"
-            color="error"
-            onClick={() => handleDelete(row.original)}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Box>
-      ),
-    },
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={() => handleDelete(row.original)}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            ),
+          },
+        ]
+      : []),
   ];
   return (
     <Box>

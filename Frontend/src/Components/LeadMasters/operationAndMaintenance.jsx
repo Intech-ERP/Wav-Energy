@@ -5,7 +5,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { IconButton, TextField } from "@mui/material";
 import { useFetchData } from "../../Hooks/useFetchData";
-import { removeMasterData, updateMasterSortOrder } from "../../Services/leadMaster.service";
+import {
+  removeMasterData,
+  updateMasterSortOrder,
+} from "../../Services/leadMaster.service";
 import { showError, showSuccess } from "../../Services/alert";
 import DeleteModal from "../Common/Modal";
 
@@ -15,6 +18,11 @@ const OperationAndMaintenance = ({ tabValue, onEditData, refreshKey }) => {
   const [tableData, setTableData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteRow, setDeleteRow] = useState([]);
+
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const permission = user?.menu?.find((item) => item.name === "Lead Master");
+  const hasFullAccess = permission?.access === "full";
 
   const updateDisplayOrder = async (dispValue, row) => {
     try {
@@ -73,7 +81,10 @@ const OperationAndMaintenance = ({ tabValue, onEditData, refreshKey }) => {
 
   const handleDeleteData = async () => {
     try {
-      const response = await removeMasterData(deleteRow?.operation_id, tabValue);
+      const response = await removeMasterData(
+        deleteRow?.operation_id,
+        tabValue
+      );
       if (response?.success) {
         showSuccess("Data deleted successfully");
         refetch();
@@ -92,6 +103,9 @@ const OperationAndMaintenance = ({ tabValue, onEditData, refreshKey }) => {
       header: "Display Order",
       enableGlobalFilter: true,
       Cell: ({ row }) => {
+        if (!hasFullAccess) {
+          return row.original.disp_order ?? "";
+        }
         const rowId = row.index;
         const tableValue = row.original.disp_order ?? 0;
         const displayValue = editDispValue[rowId] ?? tableValue;
@@ -130,30 +144,34 @@ const OperationAndMaintenance = ({ tabValue, onEditData, refreshKey }) => {
     },
     { id: 3, accessorKey: "created_date", header: "Created Date" },
     { id: 4, accessorKey: "updated_date", header: "Modified Date" },
-    {
-      id: 5,
-      accessorKey: "action",
-      header: "Action",
-      Cell: ({ row }) => (
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <IconButton
-            size="small"
-            color="primary"
-            onClick={() => handleEditData(row.original)}
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
+    ...(hasFullAccess
+      ? [
+          {
+            id: 5,
+            accessorKey: "action",
+            header: "Action",
+            Cell: ({ row }) => (
+              <Box sx={{ display: "flex", gap: 1 }}>
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={() => handleEditData(row.original)}
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
 
-          <IconButton
-            size="small"
-            color="error"
-            onClick={() => handleDelete(row.original)}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Box>
-      ),
-    },
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={() => handleDelete(row.original)}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            ),
+          },
+        ]
+      : []),
   ];
   useEffect(() => {
     setTableData(data.sort((a, b) => a.disp_order - b.disp_order));

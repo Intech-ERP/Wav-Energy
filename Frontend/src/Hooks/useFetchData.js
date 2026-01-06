@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { fetchData } from "../Services/fetchData";
+import { getToken } from "../utils/token";
 
 export const useFetchData = (url) => {
   const [data, setData] = useState([]);
@@ -10,6 +11,7 @@ export const useFetchData = (url) => {
     try {
       setLoading(true);
       setError("");
+
       const response = await fetchData(url);
 
       const sortedData = response.sort(
@@ -28,7 +30,7 @@ export const useFetchData = (url) => {
   useEffect(() => {
     getFetchData();
   }, [getFetchData]);
-  
+
   return {
     data,
     setData,

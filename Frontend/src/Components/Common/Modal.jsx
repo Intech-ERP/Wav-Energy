@@ -13,6 +13,7 @@ export default function DeleteModal({
   handleDeleteData,
   title,
 }) {
+  console.log("delete modal running");
   return (
     <div>
       {/* <TriggerButton onClick={handleOpen}>Open modal</TriggerButton> */}

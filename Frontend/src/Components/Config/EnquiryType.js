@@ -11,12 +11,12 @@ export const enquiryTypeForm = [
     type: "select",
     required: true,
   },
-  // {
-  //   label: "Advisory",
-  //   name: "advisory",
-  //   type: "select",
-  //   required: true,
-  // },
+  {
+    label: "Advisory",
+    name: "advisory",
+    type: "select",
+    required: true,
+  },
   // {
   //   label: "Execution",
   //   name: "execution",

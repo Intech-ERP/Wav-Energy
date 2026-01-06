@@ -22,14 +22,17 @@ import CloseIcon from "@mui/icons-material/Close";
 import { EnquiryForm } from "../Config/AddEnquiry";
 import { Controller, set, useForm } from "react-hook-form";
 import { showError, showSuccess } from "../../Services/alert";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
-  addEnquiry,
-  convertedEnquiry,
-  updateEnquiry,
+  addLeads,
+  convertedLeads,
+  removeConvertedLead,
+  updateLead,
 } from "../../Services/enquiry.service";
 import { useFetchData } from "../../Hooks/useFetchData";
 import { data, useNavigate } from "react-router-dom";
 import { Tabs, TabList, Tab, TabPanel, tabClasses } from "@mui/joy";
+import DeleteModal from "../Common/Modal";
 
 export const formatDate = (date) => {
   if (!date) return "";
@@ -49,7 +52,10 @@ export const formatDate = (date) => {
 };
 
 export const Header = ({ onAddEnquiry, pendingCount }) => {
+  const user = JSON.parse(localStorage.getItem("user"));
   const isPending = Boolean(pendingCount);
+  const showRights = user.menu?.filter((item) => item.name === "Lead");
+  console.log("showRights", showRights);
   return (
     <Box
       sx={{
@@ -68,22 +74,23 @@ export const Header = ({ onAddEnquiry, pendingCount }) => {
             fontSize: "18px",
           }}
         >
-          Cold Call
+          Lead
         </Typography>
       </Breadcrumbs>
 
-      <Box sx={{ display: "flex", gap: 1.5, mt: { xs: 1, md: 0 } }}>
-        <Button
-          variant="contained"
-          size="small"
-          sx={{ borderRadius: 0, textTransform: "none" }}
-          startIcon={<AddCircleOutlinedIcon />}
-          onClick={() => onAddEnquiry((prev) => !prev)}
-        >
-          Add Enquiry
-        </Button>
+      {showRights[0].access === "full" && (
+        <Box sx={{ display: "flex", gap: 1.5, mt: { xs: 1, md: 0 } }}>
+          <Button
+            variant="contained"
+            size="small"
+            sx={{ borderRadius: 0, textTransform: "none" }}
+            startIcon={<AddCircleOutlinedIcon />}
+            onClick={() => onAddEnquiry((prev) => !prev)}
+          >
+            Add Lead
+          </Button>
 
-        {/* {isPending && (
+          {/* {isPending && (
           <Button
             variant="contained"
             size="small"
@@ -111,12 +118,13 @@ export const Header = ({ onAddEnquiry, pendingCount }) => {
             />
           </Button>
         )} */}
-      </Box>
+        </Box>
+      )}
     </Box>
   );
 };
 
-export const AddEnquiry = ({ open, onClose, refetch, editRow }) => {
+export const AddLead = ({ open, onClose, refetch, editRow }) => {
   const { control, handleSubmit, reset } = useForm();
 
   const isEdit = Boolean(editRow);
@@ -126,12 +134,12 @@ export const AddEnquiry = ({ open, onClose, refetch, editRow }) => {
     "",
   ];
 
-  const handleSubmitEnquiry = async (data) => {
-    console.log("Enquiry Data:", data);
+  const handleSubmitLead = async (data) => {
+    console.log("Lead Data:", data);
     try {
-      const response = await addEnquiry(data);
+      const response = await addLeads(data);
       if (response.success) {
-        showSuccess("Enquiry added successfully");
+        showSuccess("Lead added successfully");
         reset();
         onClose();
         refetch();
@@ -142,12 +150,12 @@ export const AddEnquiry = ({ open, onClose, refetch, editRow }) => {
     }
   };
 
-  const handleUpdateEnquiry = async (data) => {
+  const handleUpdateLead = async (data) => {
     console.log("Update Enquiry Data:", data);
     try {
-      const response = await updateEnquiry(editRow?.enquiry_id, { data: data });
+      const response = await updateLead(editRow?.lead_id, { data: data });
       if (response.success) {
-        showSuccess(response.message || "Enquiry updated successfully1");
+        showSuccess(response.message || "Lead updated successfully1");
         reset({
           company_name: "",
           contact_person: "",
@@ -215,7 +223,7 @@ export const AddEnquiry = ({ open, onClose, refetch, editRow }) => {
           }}
         >
           <Typography sx={{ color: "#0072BC", fontSize: 17 }}>
-            {isEdit ? "Edit Enquiry" : "Add Enquiry"}
+            {isEdit ? "Edit Lead" : "Add Lead"}
           </Typography>
           <IconButton onClick={handleClose} sx={{ ml: 2 }}>
             <CloseIcon sx={{ color: "#0072BC" }} />
@@ -227,7 +235,7 @@ export const AddEnquiry = ({ open, onClose, refetch, editRow }) => {
             component={"form"}
             noValidate
             onSubmit={handleSubmit(
-              isEdit ? handleUpdateEnquiry : handleSubmitEnquiry
+              isEdit ? handleUpdateLead : handleSubmitLead
             )}
           >
             <Grid container spacing={2} columns={12}>
@@ -363,13 +371,19 @@ export const AddEnquiry = ({ open, onClose, refetch, editRow }) => {
   );
 };
 
-const ColdCall = () => {
-  const [addEnquiry, setAddEnquiry] = useState(false);
+const Lead = () => {
+  const [addLead, setAddLead] = useState(false);
   const [editRow, setEditRow] = useState(null);
   const [tabValue, setTabValue] = useState("pending");
   const [convertedData, setConvertedData] = useState([]);
+  const { data, error, refetch } = useFetchData("/leads");
+  const [deleteRow, setDeleteRow] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
-  const { data, error, refetch } = useFetchData("/enquiries");
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const leadPermission = user?.menu?.find((item) => item.name === "Lead");
+  const hasFullAccess = leadPermission?.access === "full";
 
   const navigate = useNavigate();
 
@@ -378,18 +392,18 @@ const ColdCall = () => {
     contact_person: `${item.contact_person} / ${item.mobile}`,
   }));
 
-  const handleAddEnquiry = () => {
-    setAddEnquiry((prev) => !prev);
+  const handleAddLead = () => {
+    setAddLead((prev) => !prev);
     setEditRow(null);
   };
   const handleEditEnquiry = (enquiry) => {
-    setAddEnquiry(true);
+    setAddLead(true);
     setEditRow(enquiry);
   };
 
   const getConvertedData = async () => {
     try {
-      const res = await convertedEnquiry();
+      const res = await convertedLeads();
       if (res.success) {
         setConvertedData(res?.data);
         console.log("convert data", res?.data);
@@ -399,55 +413,76 @@ const ColdCall = () => {
     }
   };
 
+  const handleDelete = (row) => {
+    setModalOpen(true);
+    setDeleteRow(row);
+  };
+
+  const handleDeleteData = async () => {
+    const response = await removeConvertedLead(deleteRow?.lead_id);
+
+    if (response) {
+      showSuccess("Converted data Removed Successfully!");
+    }
+  };
+
   useEffect(() => {
     if (tabValue === "converted") {
       getConvertedData();
     }
   }, [tabValue]);
 
-  const handleConvertLead = (row) => {
-    navigate("/generate-lead", { state: { convertLead: [row] } });
+  const handleConvertEnquiry = (row) => {
+    navigate("/generate-enquiry", { state: { convertEnquiry: [row] } });
   };
   const column = [
+    // base columns
     {
       id: 1,
       accessorKey: "company_name",
       header: "Company Name",
-      Cell: ({ row }) => (
-        <Box
-          sx={{
-            cursor: "pointer",
-            //  color: "primary.main",
-            textDecoration: "none",
-          }}
-          onClick={() => handleEditEnquiry(row.original)}
-        >
-          {row.original.company_name}
-        </Box>
-      ),
+      Cell: ({ row }) =>
+        hasFullAccess ? (
+          <Box
+            sx={{
+              cursor: "pointer",
+              // color: "primary.main",
+            }}
+            onClick={() => handleEditEnquiry(row.original)}
+          >
+            {row.original.company_name}
+          </Box>
+        ) : (
+          <Box>{row.original.company_name}</Box>
+        ),
     },
     { id: 2, accessorKey: "contact_person", header: "Contact Person" },
     { id: 3, accessorKey: "last_followup_date", header: "Last Followup Date" },
     { id: 4, accessorKey: "next_followup_date", header: "Next Followup Date" },
     { id: 5, accessorKey: "company_details", header: "Remarks" },
-    {
-      id: 6,
-      accessorKey: "action",
-      header: "Action",
-      Cell: ({ row }) => (
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <Button
-            variant="contained"
-            size="small"
-            sx={{ borderRadius: 0 }}
-            onClick={() => handleConvertLead(row.original)}
-          >
-            Convert to Lead
-          </Button>
-        </Box>
-      ),
-    },
+    ...(hasFullAccess
+      ? [
+          {
+            id: 6,
+            accessorKey: "action",
+            header: "Action",
+            Cell: ({ row }) => (
+              <Box sx={{ display: "flex", gap: 1 }}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  sx={{ borderRadius: 0 }}
+                  onClick={() => handleConvertEnquiry(row.original)}
+                >
+                  Convert to Enquiry
+                </Button>
+              </Box>
+            ),
+          },
+        ]
+      : []),
   ];
+
   const column2 = [
     {
       id: 1,
@@ -469,6 +504,22 @@ const ColdCall = () => {
     { id: 3, accessorKey: "last_followup_date", header: "Last Followup Date" },
     { id: 4, accessorKey: "next_followup_date", header: "Next Followup Date" },
     { id: 5, accessorKey: "company_details", header: "Remarks" },
+    {
+      id: 6,
+      accessorKey: "action",
+      header: "Action",
+      Cell: ({ row }) => (
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <IconButton
+            size="small"
+            color="error"
+            onClick={() => handleDelete(row.original)}
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      ),
+    },
   ];
 
   const handleTabChange = (event, newValue) => {
@@ -478,10 +529,10 @@ const ColdCall = () => {
   return (
     <>
       <Box>
-        <Header onAddEnquiry={setAddEnquiry} pendingCount={data.length} />
-        <AddEnquiry
-          open={addEnquiry}
-          onClose={handleAddEnquiry}
+        <Header onAddEnquiry={setAddLead} pendingCount={data.length} />
+        <AddLead
+          open={addLead}
+          onClose={handleAddLead}
           refetch={refetch}
           editRow={editRow}
         />
@@ -548,10 +599,16 @@ const ColdCall = () => {
               <Table columns={column2} data={convertedData} />
             </TabPanel>
           </Tabs>
+          <DeleteModal
+            title={"converted Data"}
+            modalOpen={modalOpen}
+            setModalOpen={() => setModalOpen((prev) => !prev)}
+            handleDeleteData={handleDeleteData}
+          />
         </Box>
       </Box>
     </>
   );
 };
 
-export default ColdCall;
+export default Lead;

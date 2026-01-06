@@ -14,6 +14,11 @@ import { deleteCustomer } from "../../Services/customer.service";
 export const Header = () => {
   const navigate = useNavigate();
 
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const permission = user?.menu?.find((item) => item.name === "Address Book");
+  const hasFullAccess = permission?.access === "full";
+
   const handleNewCustomer = () => {
     navigate("/customer");
   };
@@ -40,17 +45,19 @@ export const Header = () => {
           </Typography>
         </Breadcrumbs>
 
-        <Box>
-          <Button
-            variant="contained"
-            size="small"
-            sx={{ borderRadius: 0, textTransform: "none" }}
-            startIcon={<AddCircleOutlinedIcon />}
-            onClick={handleNewCustomer}
-          >
-            New Customer
-          </Button>
-        </Box>
+        {hasFullAccess && (
+          <Box>
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ borderRadius: 0, textTransform: "none" }}
+              startIcon={<AddCircleOutlinedIcon />}
+              onClick={handleNewCustomer}
+            >
+              New Customer
+            </Button>
+          </Box>
+        )}
       </Box>
     </>
   );
@@ -60,6 +67,11 @@ const Addressbook = () => {
   const { data, error, loading, refetch } = useFetchData("/customers");
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteRow, setDeleteRow] = useState(null);
+
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const permission = user?.menu?.find((item) => item.name === "Address Book");
+  const hasFullAccess = permission?.access === "full";
 
   const navigate = useNavigate();
 
@@ -89,31 +101,35 @@ const Addressbook = () => {
     { id: 2, accessorKey: "alias_name", header: "Alias Name" },
     { id: 3, accessorKey: "pincode", header: "Pincode" },
     { id: 4, accessorKey: "created_date", header: "Created Date" },
-    { id: 5, accessorKey: "modified_date", header: "Modified Date" },
-    {
-      id: 6,
-      accessorKey: "action",
-      header: "Action",
-      Cell: ({ row }) => (
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <IconButton
-            size="small"
-            color="primary"
-            onClick={() => handleEditData(row.original)}
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
+    { id: 5, accessorKey: "updated_date", header: "Modified Date" },
+    ...(hasFullAccess
+      ? [
+          {
+            id: 6,
+            accessorKey: "action",
+            header: "Action",
+            Cell: ({ row }) => (
+              <Box sx={{ display: "flex", gap: 1 }}>
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={() => handleEditData(row.original)}
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
 
-          <IconButton
-            size="small"
-            color="error"
-            onClick={() => handleDelete(row.original)}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Box>
-      ),
-    },
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={() => handleDelete(row.original)}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
