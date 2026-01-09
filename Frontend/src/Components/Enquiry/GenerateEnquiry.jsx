@@ -87,7 +87,7 @@ const GenerateEnquiry = () => {
   const [contactPerson, setContactPerson] = useState([]);
   const [isNewContactPerson, setIsNewContactPerson] = useState(false);
   const [states, setStates] = useState([]);
-  const { data = [] } = useFetchData("/customers");
+  const { data = [], refetch } = useFetchData("/customers");
 
   const { state } = useLocation();
 
@@ -136,6 +136,8 @@ const GenerateEnquiry = () => {
     }));
   }, [data]);
 
+  console.log("company namesssss", companyNames);
+
   const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
       company_id: "",
@@ -159,12 +161,12 @@ const GenerateEnquiry = () => {
       const response = await getContactsById(companyId);
       if (response?.success) {
         setContactPerson(response?.data);
-        setValue("contact_person", null, {
-          shouldDirty: false,
-          shouldTouch: false,
-          shouldValidate: false,
-        });
-        setIsNewContactPerson(false);
+        // setValue("contact_person", null, {
+        //   shouldDirty: false,
+        //   shouldTouch: false,
+        //   shouldValidate: false,
+        // });
+        // setIsNewContactPerson(false);
       }
     } catch (error) {
       showError("Error Fetching contacts");
@@ -195,27 +197,43 @@ const GenerateEnquiry = () => {
   };
 
   useEffect(() => {
-    if (isEditMode) {
-      setValue("company_name", editData.company_name, {
+    if (isEditMode && editData) {
+      if (!isEditMode) return;
+      if (!editData) return;
+      if (!companyNames.length) return;
+
+      const matchedCompany = companyNames.find(
+        (item) => item.label === editData.company_name
+      );
+
+      console.log("matchedCompany", matchedCompany);
+
+      if (!matchedCompany) return;
+
+      setValue("company_name", matchedCompany.label, {
         shouldDirty: false,
         shouldTouch: false,
         shouldValidate: false,
       });
+      setValue("company_id", matchedCompany.company_id);
       setValue("contact_person", editData.contact_person, {
         shouldDirty: false,
         shouldTouch: false,
         shouldValidate: false,
       });
-      // setValue("mobile_no", editData.mobile, {
-      //   shouldDirty: false,
-      //   shouldTouch: false,
-      //   shouldValidate: false,
-      // });
-      // setValue("company_details", editData.company_details, {
-      //   shouldDirty: false,
-      //   shouldTouch: false,
-      //   shouldValidate: false,
-      // });
+      setValue("group_name", matchedCompany.group_name || "");
+      setValue("mobile_no", matchedCompany.mobile_no || "");
+      setValue("branch_div", matchedCompany.branch_div || "");
+      setValue("gst_number", matchedCompany.gst_number || "");
+      setValue("email", matchedCompany.email || "");
+      setValue("website", matchedCompany.website || "");
+      setValue("address_line_1", matchedCompany.address_line_1 || "");
+      setValue("address_line_2", matchedCompany.address_line_2 || "");
+      setValue("country", matchedCompany.country || "");
+      setValue("state", matchedCompany.state || "");
+      setValue("pincode", matchedCompany.pincode || "");
+      setValue("company_details", matchedCompany.company_details || "");
+      fetchContactPersons(matchedCompany.company_id);
     } else if (isConvertToEnquiry) {
       const firstLead = convertToLeads[0];
       setValue("company_name", firstLead.company_name, {
@@ -254,7 +272,7 @@ const GenerateEnquiry = () => {
         shouldValidate: false,
       });
     }
-  }, [isEditMode, isConvertToEnquiry]);
+  }, [isEditMode, isConvertToEnquiry, companyNames]);
 
   useEffect(() => {
     if (country === "India") {
@@ -307,16 +325,15 @@ const GenerateEnquiry = () => {
                           <Autocomplete
                             freeSolo
                             options={companyNames || []}
+                            isOptionEqualToValue={(option, value) =>
+                              option.label === value?.label
+                            }
                             getOptionLabel={(option) =>
                               typeof option === "string" ? option : option.label
                             }
                             value={controllerField.value || null}
                             onChange={(_, newValue) => {
-                              controllerField.onChange(
-                                typeof newValue === "string"
-                                  ? newValue
-                                  : newValue?.label || null
-                              );
+                              controllerField.onChange(newValue);
                               clearCompanyDependentFields();
                               setIsNewCustomer(false);
 
@@ -412,6 +429,7 @@ const GenerateEnquiry = () => {
                               <TextField
                                 {...params}
                                 size="small"
+                                value={controllerField.value || ""}
                                 fullWidth
                                 error={!!fieldState.error}
                                 helperText={fieldState.error?.message}
