@@ -62,6 +62,7 @@ const UserForm = ({ openForm, onClose, editRow }) => {
       employee_id: "",
       menu: [],
       rights: {},
+      role: ""
     },
   });
   const menu = useWatch({
@@ -100,6 +101,7 @@ const UserForm = ({ openForm, onClose, editRow }) => {
       reset({
         user_name: editRow.user,
         employee_id: editRow.emp_id,
+        role: editRow.role,
         menu: editRow?.menu?.map((item) => item.name),
         rights: rightsObj,
       });
@@ -108,7 +110,7 @@ const UserForm = ({ openForm, onClose, editRow }) => {
 
   const handleClose = () => {
     onClose();
-    reset({ user_name: "", employee_id: "", menu: [], rights: {} });
+    reset({ user_name: "", employee_id: "", menu: [], rights: {}, role: "" });
   };
   return (
     <>
@@ -164,9 +166,9 @@ const UserForm = ({ openForm, onClose, editRow }) => {
                         render={({ field: controllerField, fieldState }) => (
                           <TextField
                             {...controllerField}
-                            type={
-                              user.name === "employee_id" ? "number" : "text"
-                            }
+                            // type={
+                            //   user.name === "employee_id" ? "number" : "text"
+                            // }
                             value={controllerField.value || ""}
                             size="small"
                             fullWidth

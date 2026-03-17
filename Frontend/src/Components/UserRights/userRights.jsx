@@ -119,8 +119,9 @@ const UserRights = () => {
   const column = [
     { id: 1, accessorKey: "user", header: "User" },
     { id: 2, accessorKey: "emp_id", header: "Employee Id" },
+    { id: 3, accessorKey: "role", header: "Role" },
     {
-      id: 3,
+      id: 4,
       accessorKey: "rights",
       header: "Rights",
       Cell: ({ cell }) => {
@@ -129,7 +130,7 @@ const UserRights = () => {
       },
     },
     {
-      id: 4,
+      id: 5,
       accessorKey: "action",
       header: "Action",
       Cell: ({ row }) => (

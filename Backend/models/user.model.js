@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema({
   emp_id: { type: String },
   password: { type: String },
   menu: [menuSchema],
+  role:{type: String,default:''},
   status: { type: Number, default: 1 },
   created_date: { type: Date, default: Date.now },
   updated_date: { type: Date },
@@ -47,7 +48,7 @@ userSchema.pre("save", async function (next) {
     this.updated_date = formatDateToIST(new Date());
     next();
   } catch (err) {
-    console.error("Error in generating company_id:", err);
+    console.error("Error in generating user_id:", err);
     next(err);
   }
 });

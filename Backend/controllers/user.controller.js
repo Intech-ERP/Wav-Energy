@@ -11,7 +11,7 @@ const hashPasswordFn = async (password) => {
 exports.userLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await userModel.findOne({ user: username });
+    const user = await userModel.findOne({ emp_id: username });
     if (!user) {
       return res
         .status(401)
@@ -52,10 +52,12 @@ exports.userLogin = async (req, res) => {
 
 exports.addUser = async (req, res) => {
   try {
-    const { menu, rights, user_name, employee_id } = req.body;
+    const { menu, rights, user_name, employee_id, role } = req.body;
+
+    console.log({role});
 
     const existingUser = await userModel.findOne({
-      user: user_name,
+      emp_id: employee_id,
       status: 1,
     });
 
@@ -79,6 +81,7 @@ exports.addUser = async (req, res) => {
       emp_id: employee_id,
       password: hashPassword,
       menu: menus,
+      role: role
     });
     await result.save();
 

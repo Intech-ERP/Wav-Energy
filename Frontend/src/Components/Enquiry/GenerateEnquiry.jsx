@@ -233,7 +233,9 @@ const GenerateEnquiry = () => {
       setValue("state", matchedCompany.state || "");
       setValue("pincode", matchedCompany.pincode || "");
       setValue("company_details", matchedCompany.company_details || "");
+
       fetchContactPersons(matchedCompany.company_id);
+      
     } else if (isConvertToEnquiry) {
       const firstLead = convertToLeads[0];
       setValue("company_name", firstLead.company_name, {
