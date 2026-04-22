@@ -7,25 +7,31 @@ export const useFetchData = (url) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const getFetchData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
+  const getFetchData = useCallback(
+    async (customParam) => {
+      try {
+        setLoading(true);
+        setError("");
 
-      const response = await fetchData(url);
+        // decide URL dynamically
+        const finalUrl = customParam ? `${url}_${customParam}` : url;
 
-      const sortedData = response.sort(
-        (a, b) => new Date(b.created_date) - new Date(a.created_date)
-      );
+        const response = await fetchData(finalUrl);
+        
+        const sortedData = response.sort(
+          (a, b) => new Date(b.created_date) - new Date(a.created_date)
+        );
 
-      setData(sortedData);
-    } catch (err) {
-      setError(err?.response?.data?.message || "Failed to fetch data");
-      console.error("Fetch error:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [url]);
+        setData(sortedData);
+      } catch (err) {
+        setError(err?.response?.data?.message || "Failed to fetch data");
+        console.error("Fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [url]
+  );
 
   useEffect(() => {
     getFetchData();

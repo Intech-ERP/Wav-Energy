@@ -52,6 +52,9 @@ const LeadMasterForm = ({
         onClose();
         setIsAdvisoryAdded();
       }
+      else if (response.success === false) {
+        showError(response.message || "Update failed");
+      }
     } catch (error) {
       console.error(`Error Adding ${tabValue}`, error);
     }

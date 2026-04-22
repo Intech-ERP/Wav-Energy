@@ -473,6 +473,10 @@ const EnquiryType = () => {
                                 </MenuItem>
                                 <MenuItem value="reference">Reference</MenuItem>
                                 <MenuItem value="website">Website</MenuItem>
+                                <MenuItem value="field_marketing">Field Marketing</MenuItem>
+                                <MenuItem value="Facebook">Facebook</MenuItem>
+                                <MenuItem value="Instagram">Instagram</MenuItem>
+                                <MenuItem value="LinkedIn">LinkedIn</MenuItem>
                               </TextField>
                             )}
                           />

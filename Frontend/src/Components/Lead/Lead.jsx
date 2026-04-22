@@ -14,6 +14,7 @@ import {
   Grid,
   TextField,
   FormControl,
+  MenuItem,
 } from "@mui/material";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import AddCircleOutlinedIcon from "@mui/icons-material/AddCircleOutlined";
@@ -50,6 +51,13 @@ export const formatDate = (date) => {
 
   return d.toISOString().split("T")[0];
 };
+
+const tablist = [
+  { label: "All", value: "all" },
+  { label: "Today Follow Up", value: "today_followup" },
+  { label: "Overdue", value: "overdue" },
+  { label: "Converted", value: "converted" },
+];
 
 export const Header = ({ onAddEnquiry, pendingCount }) => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -126,6 +134,7 @@ export const Header = ({ onAddEnquiry, pendingCount }) => {
 
 export const AddLead = ({ open, onClose, refetch, editRow }) => {
   const { control, handleSubmit, reset } = useForm();
+  const { data, setData } = useFetchData(`lead_type`);
 
   const isEdit = Boolean(editRow);
 
@@ -179,10 +188,13 @@ export const AddLead = ({ open, onClose, refetch, editRow }) => {
     reset({
       company_name: editRow?.company_name,
       contact_person: contactPerson,
+      designation: editRow?.designation,
       mobile_no: Number(mobile),
       email_id: editRow?.email || "",
       address: editRow?.address,
       website: editRow?.website,
+      lead_type: editRow?.lead_type,
+      lead_source: editRow?.lead_source,
       next_followup_date: formatDate(editRow?.next_followup_date),
       company_details: editRow?.company_details,
     });
@@ -324,9 +336,96 @@ export const AddLead = ({ open, onClose, refetch, editRow }) => {
                           )}
                         />
                       )}
+                      {field.type === "select" && field.name === 'lead_type' && (
+                        <Controller
+                          name={field.name}
+                          control={control}
+                          type={field.type}
+                          rules={{
+                            required: field.required
+                              ? `${field.label} is required`
+                              : false,
+                            // pattern: {
+                            //   value: /^[0-9]{10}$/,
+                            //   message: "Phone number must be 10 digits",
+                            // },
+                          }}
+                          render={({ field, fieldState }) => (
+                            <TextField
+                              {...field}
+                              select
+                              size="small"
+                              fullWidth
+                              error={!!fieldState.error}
+                              helperText={fieldState.error?.message}
+                            >
+
+                              <MenuItem value="">-- Select --</MenuItem>
+                              {data.map((option) => (
+                                <MenuItem
+                                  key={option.lead_type_id}
+                                  value={option.lead_type}
+                                >
+                                  {option.lead_type}
+                                </MenuItem>
+                              ))}
+                            </TextField>
+                          )}
+                        />
+                      )}
+                      {field.type === "select" && field.name === 'lead_source' && (
+                        <Controller
+                          name={field.name}
+                          control={control}
+                          type={field.type}
+                          rules={{
+                            required: field.required
+                              ? `${field.label} is required`
+                              : false,
+                            // pattern: {
+                            //   value: /^[0-9]{10}$/,
+                            //   message: "Phone number must be 10 digits",
+                            // },
+                          }}
+                          render={({ field, fieldState }) => (
+                            <TextField
+                              {...field}
+                              select
+                              size="small"
+                              fullWidth
+                              error={!!fieldState.error}
+                              helperText={fieldState.error?.message}
+                            >
+
+                              <MenuItem value="" disabled>
+                                --Select--
+                              </MenuItem>
+                              {/* {enquiry.options.map((option) => (
+                                                              <MenuItem key={option.value} value={option.value}>
+                                                                {option.label}
+                                                              </MenuItem>
+                                                            ))} */}
+                              <MenuItem value="Associate">Associate</MenuItem>
+                              <MenuItem value="cold_call">Cold Call</MenuItem>
+                              <MenuItem value="email_marketing">
+                                Email Marketing
+                              </MenuItem>
+                              <MenuItem value="email_marketing">
+                                Existing
+                              </MenuItem>
+                              <MenuItem value="reference">Reference</MenuItem>
+                              <MenuItem value="website">Website</MenuItem>
+                              <MenuItem value="field_marketing">Field Marketing</MenuItem>
+                              <MenuItem value="Facebook">Facebook</MenuItem>
+                              <MenuItem value="Instagram">Instagram</MenuItem>
+                              <MenuItem value="LinkedIn">LinkedIn</MenuItem>
+                            </TextField>
+                          )}
+                        />
+                      )}
                       {field.type !== "multiline" &&
                         field.type !== "date" &&
-                        field.type !== "number" && (
+                        field.type !== "number" && field.type !== "select" && (
                           <Controller
                             name={field.name}
                             control={control}
@@ -374,7 +473,7 @@ export const AddLead = ({ open, onClose, refetch, editRow }) => {
 const Lead = () => {
   const [addLead, setAddLead] = useState(false);
   const [editRow, setEditRow] = useState(null);
-  const [tabValue, setTabValue] = useState("pending");
+  const [tabValue, setTabValue] = useState("all");
   const [convertedData, setConvertedData] = useState([]);
   const { data, error, refetch } = useFetchData("/leads");
   const [deleteRow, setDeleteRow] = useState(null);
@@ -430,6 +529,15 @@ const Lead = () => {
     if (tabValue === "converted") {
       getConvertedData();
     }
+    else if (tabValue === "today_followup") {
+      refetch('today_followup');
+    }
+    else if (tabValue === "all") {
+      refetch();
+    }
+    else if (tabValue === "overdue") {
+      refetch('overdue');
+    }
   }, [tabValue]);
 
   const handleConvertEnquiry = (row) => {
@@ -459,27 +567,27 @@ const Lead = () => {
     { id: 2, accessorKey: "contact_person", header: "Contact Person" },
     { id: 3, accessorKey: "last_followup_date", header: "Last Followup Date" },
     { id: 4, accessorKey: "next_followup_date", header: "Next Followup Date" },
-    { id: 5, accessorKey: "company_details", header: "Remarks" },
+    { id: 5, accessorKey: "company_details", header: "Company Details" },
     ...(hasFullAccess
       ? [
-          {
-            id: 6,
-            accessorKey: "action",
-            header: "Action",
-            Cell: ({ row }) => (
-              <Box sx={{ display: "flex", gap: 1 }}>
-                <Button
-                  variant="contained"
-                  size="small"
-                  sx={{ borderRadius: 0 }}
-                  onClick={() => handleConvertEnquiry(row.original)}
-                >
-                  Convert to Enquiry
-                </Button>
-              </Box>
-            ),
-          },
-        ]
+        {
+          id: 6,
+          accessorKey: "action",
+          header: "Action",
+          Cell: ({ row }) => (
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button
+                variant="contained"
+                size="small"
+                sx={{ borderRadius: 0 }}
+                onClick={() => handleConvertEnquiry(row.original)}
+              >
+                Convert to Enquiry
+              </Button>
+            </Box>
+          ),
+        },
+      ]
       : []),
   ];
 
@@ -557,44 +665,32 @@ const Lead = () => {
                 },
               }}
             >
-              <Tab
-                value={"pending"}
-                disableIndicator
-                variant="soft"
-                sx={{
-                  flex: "none",
-                  scrollSnapAlign: "start",
-                  flexGrow: 1,
-                }}
-              >
-                Pending
-                <Badge
-                  badgeContent={formatData.length}
-                  color="error"
+              {tablist.map((tab) => (
+                <Tab
+                  key={tab.value}
+                  value={tab.value}
+                  disableIndicator
+                  variant="soft"
                   sx={{
-                    "& .MuiBadge-badge": {
-                      right: -12,
-                      top: -7,
-                    },
+                    flex: "none",
+                    scrollSnapAlign: "start",
+                    flexGrow: 1,
                   }}
-                />
-              </Tab>
-              <Tab
-                value={"converted"}
-                disableIndicator
-                variant="soft"
-                sx={{
-                  flex: "none",
-                  scrollSnapAlign: "start",
-                  flexGrow: 1,
-                }}
-              >
-                Converted
-              </Tab>
+                >
+                  {tab.label}
+                </Tab>
+              ))}
             </TabList>
-            <TabPanel value={"pending"}>
+            <TabPanel value={"all"}>
               <Table columns={column} data={formatData} />
             </TabPanel>
+            <TabPanel value={"today_followup"}>
+              <Table columns={column} data={formatData} />
+            </TabPanel>
+            <TabPanel value={"overdue"}>
+              <Table columns={column} data={formatData} />
+            </TabPanel>
+
             <TabPanel value={"converted"}>
               <Table columns={column2} data={convertedData} />
             </TabPanel>

@@ -578,9 +578,9 @@ const GenerateEnquiry = () => {
                           required: field.required
                             ? `${field.label} is required`
                             : false,
-                          validate: (value) =>
-                            value.length === 10 ||
-                            "Only 10-digit numbers are allowed",
+                          // validate: (value) =>
+                          //   value.length === 10 ||
+                          //   "Only 10-digit numbers are allowed",
                         }}
                         render={({ field: controllerField, fieldState }) => {
                           // const isNumber = field.type === "number";

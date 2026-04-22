@@ -24,10 +24,13 @@ exports.addLeads = async (req, res) => {
     const leadData = new leadModel({
       company_name: data.company_name,
       contact_person: data.contact_person,
+      designation: data.designation,
       mobile: data.mobile_no,
       email: data.email_id,
       address: data.address,
       website: data.website,
+      lead_type: data.lead_type,
+      lead_source: data.lead_source,
       next_followup_date: data.next_followup_date,
       company_details: data.company_details,
       last_followup_date: new Date(),
@@ -177,5 +180,84 @@ exports.removeConvertedLead = async (req, res) => {
       .json({ success: true, message: "converted data remove successfully!" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.getTodayFollowupLeads = async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const leads = await leadModel
+      .find(
+        {
+          status: 2,
+          next_followup_date: {
+            $gte: today,
+            $lt: tomorrow,
+          },
+        },
+        { _id: 0 }
+      )
+      .sort({ lead_id: -1 })
+      .lean();
+
+    const formattedLeads = leads.map((item) => ({
+      ...item,
+      last_followup_date: formatDate(item.last_followup_date),
+      next_followup_date: formatDate(item.next_followup_date),
+    }));
+
+    return res.status(200).json({
+      success: true,
+      data: formattedLeads,
+    });
+  } catch (error) {
+    console.error("Error fetching today's followups:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.getOverdueLeads = async (req, res) => {
+  try {
+    // Start of today (IST → internally UTC)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const leads = await leadModel
+      .find(
+        {
+          next_followup_date: {
+            $lt: today,
+          },
+          // status: { $ne: 2 },
+        },
+        { _id: 0 }
+      )
+      .sort({ next_followup_date: 1 })
+      .lean();
+
+    const formattedLeads = leads.map((item) => ({
+      ...item,
+      last_followup_date: formatDate(item.last_followup_date),
+      next_followup_date: formatDate(item.next_followup_date),
+    }));
+
+    return res.status(200).json({
+      success: true,
+      data: formattedLeads,
+    });
+  } catch (error) {
+    console.error("Error fetching overdue leads:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };

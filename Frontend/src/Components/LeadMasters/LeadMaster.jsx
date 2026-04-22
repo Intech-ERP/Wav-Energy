@@ -7,11 +7,13 @@ import AddCircleOutlinedIcon from "@mui/icons-material/AddCircleOutlined";
 import LeadMasterForm from "./leadMasterForm";
 import Execution from "./execution";
 import OperationAndMaintenance from "./operationAndMaintenance";
+import LeadType from "./LeadType";
 
 const tablist = [
   { label: "Adivisory", value: "advisory" },
   { label: "Execution", value: "execution" },
   { label: "Operation & Maintenance", value: "operation" },
+  { label: "Lead Type", value: "lead_type" },
 ];
 
 export const Header = ({ tabValue, handleAddData }) => {
@@ -84,6 +86,7 @@ const LeadMaster = () => {
     setEditData(row);
     setOpenForm(true);
   };
+
   return (
     <>
       <Header tabValue={tabValue} handleAddData={handleAddData} />
@@ -140,6 +143,14 @@ const LeadMaster = () => {
           </TabPanel>
           <TabPanel value={"operation"}>
             <OperationAndMaintenance
+              tabValue={tabValue}
+              refreshKey={refreshKey}
+              onEditData={handleEditData}
+            />
+          </TabPanel>
+
+          <TabPanel value={"lead_type"}>
+            <LeadType
               tabValue={tabValue}
               refreshKey={refreshKey}
               onEditData={handleEditData}

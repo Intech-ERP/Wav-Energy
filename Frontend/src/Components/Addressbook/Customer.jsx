@@ -231,6 +231,7 @@ const Customer = () => {
   const [contact, setContact] = useState(false);
   const [customerData, setCustomerData] = useState([]);
   const [states, setStates] = useState([]);
+  const [lead_type, setLead_type] = useState([]);
   const contactRef = useRef(null);
   const navigate = useNavigate();
 
@@ -303,6 +304,7 @@ const Customer = () => {
       setStates(indiaStates);
     }
   }, [country]);
+
 
   const handleSubmitData = async (data) => {
     try {

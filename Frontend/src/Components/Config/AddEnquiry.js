@@ -6,10 +6,23 @@ export const EnquiryForm = [
     type: "text",
     required: true,
   },
+  {
+    label: "Designation",
+    name: "designation",
+    type: "text",
+    required: true,
+  },
   { label: "Mobile No", name: "mobile_no", type: "number", required: true },
   { label: "Email ID", name: "email_id", type: "email", required: false },
   { label: "Address", name: "address", type: "multiline", required: true },
   { label: "Website", name: "website", type: "text", required: false },
+  { label: "Lead type", name: "lead_type", type: "select", required: true },
+  {
+    label: "Lead Source",
+    name: "lead_source",
+    type: "select",
+    required: true,
+  },
   {
     label: "Next Followup Date",
     name: "next_followup_date",

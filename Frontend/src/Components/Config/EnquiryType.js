@@ -30,12 +30,6 @@ export const enquiryTypeForm = [
   //   required: true,
   // },
   {
-    label: "Lead Source",
-    name: "lead_source",
-    type: "select",
-    required: true,
-  },
-  {
     label: "Action",
     name: "action",
     type: "select",

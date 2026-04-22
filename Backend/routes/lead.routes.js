@@ -7,10 +7,14 @@ const {
   convertToEnquiry,
   getConvertedLeads,
   removeConvertedLead,
+  getTodayFollowupLeads,
+  getOverdueLeads,
 } = require("../controllers/lead.controller");
 const authMiddleware = require("../middleware/authMiddleware");
 
 router.post("/leads", addLeads);
+router.get("/leads_today_followup", getTodayFollowupLeads);
+router.get("/leads_overdue", getOverdueLeads);
 router.get("/leads", authMiddleware, getLeads);
 router.get("/convertedLead", getConvertedLeads);
 router.put("/leads/:id", updateLead);
