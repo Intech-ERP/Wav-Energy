@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Badge,
   Box,
@@ -21,7 +21,7 @@ import AddCircleOutlinedIcon from "@mui/icons-material/AddCircleOutlined";
 import Table from "../Common/Table";
 import CloseIcon from "@mui/icons-material/Close";
 import { EnquiryForm } from "../Config/AddEnquiry";
-import { Controller, set, useForm } from "react-hook-form";
+import { Controller, set, useForm, useWatch } from "react-hook-form";
 import { showError, showSuccess } from "../../Services/alert";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
@@ -34,6 +34,7 @@ import { useFetchData } from "../../Hooks/useFetchData";
 import { data, useNavigate } from "react-router-dom";
 import { Tabs, TabList, Tab, TabPanel, tabClasses } from "@mui/joy";
 import DeleteModal from "../Common/Modal";
+import { fetchData } from "../../Services/fetchData";
 
 export const formatDate = (date) => {
   if (!date) return "";
@@ -134,7 +135,58 @@ export const Header = ({ onAddEnquiry, pendingCount }) => {
 
 export const AddLead = ({ open, onClose, refetch, editRow }) => {
   const { control, handleSubmit, reset } = useForm();
-  const { data, setData } = useFetchData(`lead_type`);
+
+  const useFetchMultiple = (urls) => {
+    const [data, setData] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+      const fetchAll = async () => {
+        try {
+          setLoading(true);
+          setError("");
+
+          const responses = await Promise.all(
+            Object.entries(urls).map(async ([key, url]) => {
+              const res = await fetchData(url);
+
+              const sortedData = res.sort(
+                (a, b) =>
+                  new Date(a.disp_order) - new Date(b.disp_order)
+              );
+
+              return [key, sortedData];
+            })
+          );
+
+          const formattedData = Object.fromEntries(responses);
+          setData(formattedData);
+
+        } catch (err) {
+          console.error("Parallel fetch error:", err);
+          setError(err?.message || "Failed to fetch multiple data");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchAll();
+    }, [urls]);
+
+    return { data, loading, error };
+  };
+
+  const urls = useMemo(() => ({
+    leadTypes: "/lead_type",
+    leadSources: "/lead_source",
+  }), []);
+
+  const { data, loading, error } = useFetchMultiple(urls);
+
+  console.log("Lead Types:", data.leadTypes);
+  console.log("Lead Sources:", data.leadSources);
+
+  // const { data, setData } = useFetchData(url);
 
   const isEdit = Boolean(editRow);
 
@@ -149,7 +201,19 @@ export const AddLead = ({ open, onClose, refetch, editRow }) => {
       const response = await addLeads(data);
       if (response.success) {
         showSuccess("Lead added successfully");
-        reset();
+        reset({
+          company_name: "",
+          contact_person: "",
+          designation: "",
+          mobile_no: "",
+          email_id: "",
+          address: "",
+          lead_type: "",
+          lead_source: "",
+          website: "",
+          next_followup_date: "",
+          company_details: "",
+        });
         onClose();
         refetch();
       }
@@ -168,9 +232,12 @@ export const AddLead = ({ open, onClose, refetch, editRow }) => {
         reset({
           company_name: "",
           contact_person: "",
+          designation: "",
           mobile_no: "",
           email_id: "",
           address: "",
+          lead_type: "",
+          lead_source: "",
           website: "",
           next_followup_date: "",
           company_details: "",
@@ -207,6 +274,8 @@ export const AddLead = ({ open, onClose, refetch, editRow }) => {
       mobile_no: "",
       email_id: "",
       address: "",
+      lead_type: "",
+      lead_source: "",
       website: "",
       next_followup_date: "",
       company_details: "",
@@ -361,7 +430,7 @@ export const AddLead = ({ open, onClose, refetch, editRow }) => {
                             >
 
                               <MenuItem value="">-- Select --</MenuItem>
-                              {data.map((option) => (
+                              {data.leadTypes.map((option) => (
                                 <MenuItem
                                   key={option.lead_type_id}
                                   value={option.lead_type}
@@ -405,7 +474,7 @@ export const AddLead = ({ open, onClose, refetch, editRow }) => {
                                                                 {option.label}
                                                               </MenuItem>
                                                             ))} */}
-                              <MenuItem value="Associate">Associate</MenuItem>
+                              {/* <MenuItem value="Associate">Associate</MenuItem>
                               <MenuItem value="cold_call">Cold Call</MenuItem>
                               <MenuItem value="email_marketing">
                                 Email Marketing
@@ -418,7 +487,15 @@ export const AddLead = ({ open, onClose, refetch, editRow }) => {
                               <MenuItem value="field_marketing">Field Marketing</MenuItem>
                               <MenuItem value="Facebook">Facebook</MenuItem>
                               <MenuItem value="Instagram">Instagram</MenuItem>
-                              <MenuItem value="LinkedIn">LinkedIn</MenuItem>
+                              <MenuItem value="LinkedIn">LinkedIn</MenuItem> */}
+                              {data.leadSources.map((option) => (
+                                <MenuItem
+                                  key={option.lead_source_id}
+                                  value={option.lead_source}
+                                >
+                                  {option.lead_source}
+                                </MenuItem>
+                              ))}
                             </TextField>
                           )}
                         />
@@ -610,7 +687,7 @@ const Lead = () => {
     },
     { id: 2, accessorKey: "contact_person", header: "Contact Person" },
     { id: 3, accessorKey: "last_followup_date", header: "Last Followup Date" },
-    { id: 4, accessorKey: "next_followup_date", header: "Next Followup Date" },
+    { id: 4, accessorKey: "converted_date", header: "Converted Date" },
     { id: 5, accessorKey: "company_details", header: "Remarks" },
     {
       id: 6,

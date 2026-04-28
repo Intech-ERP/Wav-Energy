@@ -105,35 +105,37 @@ const Enquiry = () => {
     { id: 1, accessorKey: "company_name", header: "Company Name" },
     { id: 2, accessorKey: "contact_person", header: "Contact Person" },
     { id: 3, accessorKey: "last_followup_date", header: "Last Followup Date" },
-    { id: 4, accessorKey: "next_followup_date", header: "Next Followup Date" },
-    { id: 5, accessorKey: "company_details", header: "Remarks" },
+    { id: 4, accessorKey: "enquiry_date", header: " Enquiry Date" },
+    { id: 5, accessorKey: "enquiryClosedAt", header: " Enquiry Closed At" },
+    { id: 6, accessorKey: "company_details", header: "Remarks" },
+    { id: 7, accessorKey: "action", header: "Next Action" },
     ...(hasFullAccess
       ? [
-          {
-            id: 6,
-            accessorKey: "action",
-            header: "Action",
-            Cell: ({ row }) => (
-              <Box sx={{ display: "flex", gap: 1 }}>
-                <IconButton
-                  size="small"
-                  color="primary"
-                  onClick={() => handleEditData(row.original)}
-                >
-                  <EditIcon fontSize="small" />
-                </IconButton>
+        {
+          id: 8,
+          accessorKey: "",
+          header: "Action",
+          Cell: ({ row }) => (
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <IconButton
+                size="small"
+                color="primary"
+                onClick={() => handleEditData(row.original)}
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
 
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => handleDelete(row.original)}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Box>
-            ),
-          },
-        ]
+              <IconButton
+                size="small"
+                color="error"
+                onClick={() => handleDelete(row.original)}
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          ),
+        },
+      ]
       : []),
   ];
   return (

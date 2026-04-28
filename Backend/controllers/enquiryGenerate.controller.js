@@ -13,6 +13,7 @@ const formatDate = (date) => {
 exports.generateEnquiry = async (req, res) => {
   try {
     const data = req.body;
+    console.log("req body:", data);
     const result = await new enquiries({
       company_name: data.company_name,
       contact_person: data.contact_person,
@@ -25,6 +26,7 @@ exports.generateEnquiry = async (req, res) => {
       action: data.action,
       last_followup_date: data.last_followup_date,
       next_followup_date: data.next_followup_date,
+      enquiry_date: new Date().toISOString(),
       lead_source: data.lead_source,
       company_details: data.company_details,
     }).save();
@@ -48,10 +50,12 @@ exports.getEnquiries = async (req, res) => {
 
     const formattedData = result.map((item) => ({
       ...item,
-      last_followup_date: formatDate(item.last_followup_date),  
+      last_followup_date: formatDate(item.last_followup_date),
       next_followup_date: formatDate(item.next_followup_date),
       created_date: formatDate(item.created_date),
       updated_date: formatDate(item.updated_date),
+      enquiry_date: formatDate(item.enquiry_date),
+      enquiryClosedAt: formatDate(item.enquiryClosedAt),
     }));
     console.log("formatted enquiries", formattedData);
     res.status(200).json({
@@ -64,13 +68,26 @@ exports.getEnquiries = async (req, res) => {
 };
 
 exports.updateEnquiry = async (req, res) => {
+  console.log("update enquiry called");
   try {
     const { id } = req.params;
     const data = req.body;
-    console.log("update Lead", data);
+    let mobileNo = data.mobile_no || data.mobile;
+
+    if (Array.isArray(mobileNo)) {
+      mobileNo = mobileNo[0];
+    }
+
+    const formattedData = {
+      ...data,
+      mobile: mobileNo ? String(mobileNo) : undefined,
+      enquiryClosedAt: new Date().toISOString(),
+    };
+    
+    console.log("formattedData from enquiries", formattedData);
     const result = await enquiries.findOneAndUpdate(
       { enquiry_id: id, status: 1 },
-      { $set: { ...data } },
+      { $set: { ...formattedData } },
       {
         new: true,
         runValidators: true,
@@ -84,6 +101,7 @@ exports.updateEnquiry = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Lead data updated successfully" });
   } catch (error) {
+    console.error("Update Enquiry Error:", error)
     res
       .status(400)
       .json({ success: false, message: "Error Updating Lead data" });

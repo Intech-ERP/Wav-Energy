@@ -116,7 +116,7 @@ exports.convertToEnquiry = async (req, res) => {
     console.log("enquiry id", id);
     const result = await leadModel.findOneAndUpdate(
       { lead_id: id, status: 2 },
-      { $set: { status: 1 } },
+      { $set: { status: 1, converted_date: new Date().toISOString() } },
       { new: true, runValidators: true }
     );
     res
@@ -146,6 +146,7 @@ exports.getConvertedLeads = async (req, res) => {
       ...item,
       last_followup_date: formatDate(item.last_followup_date),
       next_followup_date: formatDate(item.next_followup_date),
+      converted_date: formatDate(item.converted_date),
     }));
 
     res.status(200).json({
@@ -236,7 +237,7 @@ exports.getOverdueLeads = async (req, res) => {
           next_followup_date: {
             $lt: today,
           },
-          // status: { $ne: 2 },
+          status: { $nin: [1, 0] },
         },
         { _id: 0 }
       )

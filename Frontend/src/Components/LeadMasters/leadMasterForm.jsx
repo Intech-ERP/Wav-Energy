@@ -114,7 +114,12 @@ const LeadMasterForm = ({
           }}
         >
           <Typography sx={{ color: "#0072BC", fontSize: 17 }}>
-            {`${tabValue}`}
+            {`${tabValue === "lead_type"
+              ? "Lead Type"
+              : tabValue === "lead_source"
+              ? "Lead Source"
+              : tabValue === "next_action"
+                ? "Next Action": tabValue}`}
           </Typography>
           <IconButton sx={{ ml: 2 }} onClick={handleClose}>
             <CloseIcon sx={{ color: "#0072BC" }} />
@@ -131,7 +136,7 @@ const LeadMasterForm = ({
             <Grid container>
               <Grid size={{ xs: 12 }} sx={{ mb: 1 }}>
                 <Typography variant="body1" sx={{ fontSize: "15px" }}>
-                  {`Add ${tabValue}`}
+                  {`Add ${tabValue === "lead_type" ? "Lead Type" : tabValue === "lead_source" ? "Lead Source" : tabValue === "next_action" ? "Next Action" : tabValue}`}
                 </Typography>
               </Grid>
               <Grid size={{ xs: 12 }}>

@@ -8,12 +8,16 @@ import LeadMasterForm from "./leadMasterForm";
 import Execution from "./execution";
 import OperationAndMaintenance from "./operationAndMaintenance";
 import LeadType from "./LeadType";
+import LeadSource from "./LeadSource";
+import NextAction from "./NextAction";
 
 const tablist = [
   { label: "Adivisory", value: "advisory" },
   { label: "Execution", value: "execution" },
   { label: "Operation & Maintenance", value: "operation" },
   { label: "Lead Type", value: "lead_type" },
+  { label: "Lead Source", value: "lead_source" },
+  { label: "Next Action", value: "next_action" },
 ];
 
 export const Header = ({ tabValue, handleAddData }) => {
@@ -53,7 +57,7 @@ export const Header = ({ tabValue, handleAddData }) => {
               sx={{ borderRadius: 0, textTransform: "none" }}
               onClick={handleAddData}
             >
-              Add {tabValue}
+              Add {tabValue === 'lead_type' ? 'Lead Type' : tabValue === 'lead_source' ? 'Lead Source' : tabValue === 'next_action' ? 'Next Action' : tabValue}
             </Button>
           </Box>
         )}
@@ -151,6 +155,20 @@ const LeadMaster = () => {
 
           <TabPanel value={"lead_type"}>
             <LeadType
+              tabValue={tabValue}
+              refreshKey={refreshKey}
+              onEditData={handleEditData}
+            />
+          </TabPanel>
+          <TabPanel value={"lead_source"}>
+            <LeadSource
+              tabValue={tabValue}
+              refreshKey={refreshKey}
+              onEditData={handleEditData}
+            />
+          </TabPanel>
+          <TabPanel value={"next_action"}>  
+            <NextAction
               tabValue={tabValue}
               refreshKey={refreshKey}
               onEditData={handleEditData}

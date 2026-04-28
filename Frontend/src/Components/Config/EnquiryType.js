@@ -30,7 +30,7 @@ export const enquiryTypeForm = [
   //   required: true,
   // },
   {
-    label: "Action",
+    label: "Schedule Next Action",
     name: "action",
     type: "select",
     required: true,

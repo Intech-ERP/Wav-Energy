@@ -10,6 +10,8 @@ const advisoryMaster = require("./routes/advisoryMaster.routes.js");
 const executionMaster = require("./routes/executionMaster.routes.js");
 const operationMaster = require("./routes/operationMaster.routes.js");
 const leadTypeMaster = require("./routes/leadTypeMaster.routes.js");
+const leadSourceMaster = require("./routes/leadSourceMaster.routes.js");
+const nextActionMaster = require("./routes/nextActionMaster.routes.js");
 const userRouter = require("./routes/user.routes.js");
 const excelReportRouter = require("./routes/excelReportGenerate.routes.js");
 
@@ -31,6 +33,8 @@ app.use("/api", advisoryMaster);
 app.use("/api", executionMaster);
 app.use("/api", operationMaster);
 app.use("/api", leadTypeMaster);
+app.use("/api", leadSourceMaster);
+app.use("/api", nextActionMaster);
 app.use("/api", userRouter);
 app.use("/api", excelReportRouter);
 

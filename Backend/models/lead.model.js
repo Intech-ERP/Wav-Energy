@@ -18,6 +18,7 @@ const leadSchema = new Schema({
   lead_source: { type: String, default: "" },
   next_followup_date: { type: Date },
   last_followup_date: { type: Date },
+  converted_date: { type: String, default: "" },
   company_details: { type: String, default: "" },
   status: { type: Number, default: 2 },
   created_date: { type: Date, default: Date.now },

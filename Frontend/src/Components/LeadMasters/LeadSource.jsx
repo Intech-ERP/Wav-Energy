@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import Table from '../Common/Table'
+import { useFetchData } from '../../Hooks/useFetchData';
 import { Box } from '@mui/system';
 import { IconButton, TextField } from '@mui/material';
-import { showError, showSuccess } from "../../Services/alert";
-import DeleteModal from "../Common/Modal";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useFetchData } from '../../Hooks/useFetchData';
+import DeleteModal from '../Common/Modal';
 import { removeMasterData, updateMasterSortOrder } from '../../Services/leadMaster.service';
+import { showError, showSuccess } from '../../Services/alert';
 
-export default function LeadType({ tabValue, onEditData, refreshKey }) {
+export default function LeadSource({ tabValue, onEditData, refreshKey }) {
     const { data, refetch, setData } = useFetchData(`${tabValue}`);
     const [editDispValue, setEditDispValue] = useState({});
     const [tableData, setTableData] = useState([]);
@@ -28,7 +28,7 @@ export default function LeadType({ tabValue, onEditData, refreshKey }) {
     const updateDisplayOrder = async (dispValue, row) => {
         try {
             const newValue = parseInt(dispValue, 10);
-            const updateId = row.original.lead_type_id;
+            const updateId = row.original.lead_source_id;
             const response = await updateMasterSortOrder(
                 updateId,
                 newValue,
@@ -39,7 +39,7 @@ export default function LeadType({ tabValue, onEditData, refreshKey }) {
                 setData((prev) =>
                     prev
                         .map((item) =>
-                            item.lead_type_id === updateId
+                            item.lead_source_id === updateId
                                 ? { ...item, disp_order: newValue }
                                 : item
                         )
@@ -50,7 +50,7 @@ export default function LeadType({ tabValue, onEditData, refreshKey }) {
                 showError(response.message);
                 setData((prev) =>
                     prev.map((item) =>
-                        item.lead_type_id === updateId
+                        item.lead_source_id === updateId
                             ? { ...item, disp_order: response.resetOrder ?? item.disp_order }
                             : item
                     )
@@ -74,7 +74,6 @@ export default function LeadType({ tabValue, onEditData, refreshKey }) {
     const handleEditData = (row) => {
         onEditData(row);
     };
-
     const handleDelete = (row) => {
         setDeleteRow(row);
         setModalOpen(true);
@@ -83,7 +82,7 @@ export default function LeadType({ tabValue, onEditData, refreshKey }) {
     const handleDeleteData = async () => {
         try {
             const response = await removeMasterData(
-                deleteRow?.lead_type_id,
+                deleteRow?.lead_source_id,
                 tabValue
             );
             if (response?.success) {
@@ -100,9 +99,8 @@ export default function LeadType({ tabValue, onEditData, refreshKey }) {
         setTableData(data.sort((a, b) => a.disp_order - b.disp_order));
     }, [data]);
 
-
     const column = [
-        { id: 1, accessorKey: "lead_type", header: "Lead Type" },
+        { id: 1, accessorKey: "lead_source", header: "Lead Source" },
         {
             id: 2,
             accessorKey: "display_order",
@@ -180,14 +178,14 @@ export default function LeadType({ tabValue, onEditData, refreshKey }) {
             : []),
     ];
     return (
-        <div>
+        <Box>
             <Table columns={column} data={tableData} />
             <DeleteModal
-                title={"Lead Type"}
+                title={"Lead Source"}
                 modalOpen={modalOpen}
                 setModalOpen={() => setModalOpen((prev) => !prev)}
                 handleDeleteData={handleDeleteData}
             />
-        </div>
+        </Box>
     )
 }

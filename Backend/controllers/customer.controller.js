@@ -57,6 +57,8 @@ exports.addCustomer = async (req, res) => {
       phoneNumbers = payload.phone_no.map((item) => item.value);
     }
 
+    console.log("customer phoneNumbers", phoneNumbers);
+
     if (!payload || payload.length === 0) {
       return res.status(404).json({ message: "data is required" });
     }
@@ -152,17 +154,24 @@ exports.updateCustomer = async (req, res) => {
     }
 
     const phoneNumbers = Array.isArray(req.body.phone_no)
-      ? req.body.phone_no.map((item) => item.value)
-      : [];
+      ? req.body.phone_no
+        .map((item) => Number(item.value))
+        .filter((num) => !isNaN(num))
+      : req.body.mobile_no
+        ? [Number(req.body.mobile_no)]
+        : [];
 
     const { created_date, ...rest } = req.body;
+
+    console.log("customer phoneNumbers", phoneNumbers);
 
     const updatedCustomer = await customers.findOneAndUpdate(
       { company_id: Number(id) },
       {
         $set: {
           ...rest,
-          phone_no: phoneNumbers ? phoneNumbers : [req.body.mobile_no],
+          // phone_no: phoneNumbers ? phoneNumbers : [req.body.mobile_no],
+          phone_no: phoneNumbers,
           // created_date: convertToMongoDate(req.body?.created_date),
           updated_date: new Date(),
         },

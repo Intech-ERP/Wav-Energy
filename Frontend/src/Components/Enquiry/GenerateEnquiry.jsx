@@ -72,8 +72,8 @@ export const Header = ({ isEditMode, isConvertToEnquiry }) => {
             {isEditMode
               ? "Edit Enquiry"
               : isConvertToEnquiry
-              ? "Convert To Enquiry"
-              : " Generate Enquiry"}
+                ? "Convert To Enquiry"
+                : " Generate Enquiry"}
           </Typography>
         </Breadcrumbs>
       </Box>
@@ -88,6 +88,8 @@ const GenerateEnquiry = () => {
   const [isNewContactPerson, setIsNewContactPerson] = useState(false);
   const [states, setStates] = useState([]);
   const { data = [], refetch } = useFetchData("/customers");
+
+  console.log("customer data", data);
 
   const { state } = useLocation();
 
@@ -121,7 +123,7 @@ const GenerateEnquiry = () => {
     return data.map((item) => ({
       label: item.company_name,
       company_id: item.company_id,
-      mobile_no: Number(item.phone_no[0]),
+      mobile_no: item.phone_no || null,
       group_name: item.group_name,
       branch_div: item.branch_div,
       gst_number: item.gst_number,
@@ -222,7 +224,11 @@ const GenerateEnquiry = () => {
         shouldValidate: false,
       });
       setValue("group_name", matchedCompany.group_name || "");
-      setValue("mobile_no", matchedCompany.mobile_no || "");
+      setValue("mobile_no", matchedCompany.mobile_no || editData.mobile, {
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: false,
+      });
       setValue("branch_div", matchedCompany.branch_div || "");
       setValue("gst_number", matchedCompany.gst_number || "");
       setValue("email", matchedCompany.email || "");
@@ -235,7 +241,7 @@ const GenerateEnquiry = () => {
       setValue("company_details", matchedCompany.company_details || "");
 
       fetchContactPersons(matchedCompany.company_id);
-      
+
     } else if (isConvertToEnquiry) {
       const firstLead = convertToLeads[0];
       setValue("company_name", firstLead.company_name, {
@@ -287,6 +293,7 @@ const GenerateEnquiry = () => {
     const navigationState = {
       customerData: data,
     };
+    console.log("navigationState data's", navigationState);
     if (editData) {
       navigationState.editData = editData;
     }
@@ -354,7 +361,8 @@ const GenerateEnquiry = () => {
                                 );
                                 setValue(
                                   "mobile_no",
-                                  newValue.mobile_no || "",
+                                  newValue.mobile_no || '',
+                                  console.log("mobile number", newValue),
                                   {
                                     shouldValidate: true,
                                     shouldDirty: false,

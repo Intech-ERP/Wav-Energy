@@ -20,6 +20,8 @@ const enquiryGenerationSchema = new Schema({
   company_details: { type: String, default: "" },
   last_followup_date: { type: Date, default: new Date() },
   next_followup_date: { type: Date, default: "" },
+  enquiry_date: { type: String, default: "" },
+  enquiryClosedAt: { type: String, default: "" },
   status: { type: Number, default: 1 },
   created_date: { type: Date, default: Date.now },
   updated_date: { type: Date, default: Date.now },

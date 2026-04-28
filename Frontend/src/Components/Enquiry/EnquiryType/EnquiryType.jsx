@@ -25,6 +25,7 @@ import {
 } from "../../../Services/EnquiryGenerate.service";
 import { convertToEnquiry } from "../../../Services/enquiry.service";
 import { useFetchData } from "../../../Hooks/useFetchData";
+import { fetchData } from "../../../Services/fetchData";
 
 const formatDate = (date) => {
   if (!date) return "";
@@ -47,17 +48,20 @@ const PRODUCT_SUBTYPES = ["Water Heater", "Water Pump", "Street Light"];
 
 const SERVICE_SUBTYPES = ["Advisory", "Execution", "Operation & Maintenance"];
 const Action_OPTIONS = [
-  "No Action Taken Yet",
-  "Introduction",
-  "Call For Brief",
-  "Follow up for additional info",
+  "Acknowledge Enquiry",
+  "Send Intro Email",
+  "Client Meeting",
+  "Feasibility Study",
   "Preliminary Site Visit",
-  "Meeting Done",
-  "Feasibility study completed",
-  "Proposal-1",
-  "Proposal-2",
-  "Proposal-3",
-  "Proposal-4",
+  "Generate Offer, Submit Offer",
+  "Follow-up on Offer",
+  "Submit Revised Offer",
+  "Follow-up on Revised Offer",
+  "Negotiate Terms",
+  "Request LOI/PO",
+  "Closed Won",
+  "Closed Lost",
+  "Closed Opportunity",
 ];
 
 export const Header = () => {
@@ -154,6 +158,25 @@ const EnquiryType = () => {
 
   const { data, refetch } = useFetchData(url);
 
+  const [nextActionData, setNextActionData] = useState([]);
+  
+
+  const fetchNextActionData = async () => {
+    try{
+      const data = await fetchData("/next_action");
+      const sortedData = data.sort(
+                (a, b) =>
+                  new Date(a.disp_order) - new Date(b.disp_order)
+              );
+      setNextActionData(sortedData);
+    }
+    catch(error){
+        console.error("Error fetching next action data", error);
+    }
+  }
+
+  console.log("next action data", nextActionData);
+
   const sortedData = data.sort((a, b) => a.disp_order - b.disp_order);
 
 
@@ -164,7 +187,7 @@ const EnquiryType = () => {
   const isEditMode = Boolean(editData);
   const isConvertToLead = Boolean(convertLead);
 
-  console.log("convertLead", convertLead);
+  console.log("Edited data", editData);
 
   const enquiryType = useWatch({
     control,
@@ -188,6 +211,10 @@ const EnquiryType = () => {
       setUrl("/operation");
     }
   }, [subType]);
+
+  useEffect(() =>{
+    fetchNextActionData()
+  },[])
 
   useEffect(() => {
     if (isEditMode) {
@@ -297,6 +324,7 @@ const EnquiryType = () => {
         ...data,
         ...customerData,
       };
+      console.log("enquiry data for reference", enquiryData);
       const [customerResponse, leadResponse] = await Promise.all([
         updateCustomer(customerData.company_id, customerData),
         updateEnquiry(editData.enquiry_id, enquiryData),
@@ -505,9 +533,9 @@ const EnquiryType = () => {
                                 <MenuItem value="" disabled>
                                   --Select--
                                 </MenuItem>
-                                {Action_OPTIONS.map((option) => (
-                                  <MenuItem key={option} value={option}>
-                                    {option}
+                                {nextActionData.map((option,index) => (
+                                  <MenuItem key={index} value={option.next_action}>
+                                    {option.next_action}
                                   </MenuItem>
                                 ))}
                               </TextField>
