@@ -44,7 +44,7 @@ export const leadForm = [
   {
     label: "Nature of Biz",
     name: "nature_of_biz",
-    type: "text",
+    type: "select",
     required: false,
   },
   {
@@ -72,14 +72,14 @@ export const leadForm = [
     required: false,
   },
   {
-    label: "Address Line 3",
-    name: "address_line_3",
+    label: "Taluka",
+    name: "taluka",
     type: "text",
     required: false,
   },
   {
-    label: "Address Line 4",
-    name: "address_line_4",
+    label: "District",
+    name: "district",
     type: "text",
     required: false,
   },

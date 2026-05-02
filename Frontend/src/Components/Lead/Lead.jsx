@@ -87,19 +87,21 @@ export const Header = ({ onAddEnquiry, pendingCount }) => {
         </Typography>
       </Breadcrumbs>
 
-      {showRights[0].access === "full" && (
-        <Box sx={{ display: "flex", gap: 1.5, mt: { xs: 1, md: 0 } }}>
-          <Button
-            variant="contained"
-            size="small"
-            sx={{ borderRadius: 0, textTransform: "none" }}
-            startIcon={<AddCircleOutlinedIcon />}
-            onClick={() => onAddEnquiry((prev) => !prev)}
-          >
-            Add Lead
-          </Button>
+      {/* {showRights[0].access === "full" && (
+        
+      )} */}
+      <Box sx={{ display: "flex", gap: 1.5, mt: { xs: 1, md: 0 } }}>
+        <Button
+          variant="contained"
+          size="small"
+          sx={{ borderRadius: 0, textTransform: "none" }}
+          startIcon={<AddCircleOutlinedIcon />}
+          onClick={() => onAddEnquiry((prev) => !prev)}
+        >
+          Add Lead
+        </Button>
 
-          {/* {isPending && (
+        {/* {isPending && (
           <Button
             variant="contained"
             size="small"
@@ -127,8 +129,7 @@ export const Header = ({ onAddEnquiry, pendingCount }) => {
             />
           </Button>
         )} */}
-        </Box>
-      )}
+      </Box>
     </Box>
   );
 };
@@ -335,7 +336,7 @@ export const AddLead = ({ open, onClose, refetch, editRow }) => {
                   </Grid>
                   <Grid size={{ xs: 12, md: 3 }} sx={{ mb: 1 }}>
                     <FormControl fullWidth>
-                      {field.type === "multiline" && (
+                      {field.type === "multiline" && field.name === "company_details" && (
                         <Controller
                           name={field.name}
                           control={control}
@@ -351,6 +352,7 @@ export const AddLead = ({ open, onClose, refetch, editRow }) => {
                               multiline
                               rows={3}
                               size="small"
+                              // disabled={isEdit}
                               fullWidth
                               error={!!fieldState.error}
                               helperText={fieldState.error?.message}
@@ -379,6 +381,30 @@ export const AddLead = ({ open, onClose, refetch, editRow }) => {
                           )}
                         />
                       )}
+                      {field.type === 'multiline' && field.name === "address" && (
+                        <Controller
+                          name={field.name}
+                          control={control}
+                          rules={{
+                            required: field.required
+                              ? `${field.label} is required`
+                              : false,
+                          }}
+                          render={({ field, fieldState }) => (
+                            <TextField
+                              {...field}
+                              type="text"
+                              multiline
+                              rows={3}
+                              size="small"
+                              disabled={isEdit}
+                              fullWidth
+                              error={!!fieldState.error}
+                              helperText={fieldState.error?.message}
+                            />
+                          )}
+                        />
+                      )}
                       {field.type === "number" && (
                         <Controller
                           name={field.name}
@@ -399,6 +425,7 @@ export const AddLead = ({ open, onClose, refetch, editRow }) => {
                               type="number"
                               size="small"
                               fullWidth
+                              disabled={isEdit}
                               error={!!fieldState.error}
                               helperText={fieldState.error?.message}
                             />
@@ -425,6 +452,7 @@ export const AddLead = ({ open, onClose, refetch, editRow }) => {
                               select
                               size="small"
                               fullWidth
+                              disabled={isEdit}
                               error={!!fieldState.error}
                               helperText={fieldState.error?.message}
                             >
@@ -462,6 +490,7 @@ export const AddLead = ({ open, onClose, refetch, editRow }) => {
                               select
                               size="small"
                               fullWidth
+                              disabled={isEdit}
                               error={!!fieldState.error}
                               helperText={fieldState.error?.message}
                             >
@@ -517,6 +546,7 @@ export const AddLead = ({ open, onClose, refetch, editRow }) => {
                                 {...field}
                                 size="small"
                                 fullWidth
+                                disabled={isEdit}
                                 error={!!fieldState.error}
                                 helperText={fieldState.error?.message}
                               />
@@ -597,8 +627,12 @@ const Lead = () => {
   const handleDeleteData = async () => {
     const response = await removeConvertedLead(deleteRow?.lead_id);
 
-    if (response) {
-      showSuccess("Converted data Removed Successfully!");
+    console.log("delete response", response);
+
+    if (response.success) {
+      showSuccess("Data removed successfully!");
+      getConvertedData();
+      refetch()
     }
   };
 
@@ -649,8 +683,8 @@ const Lead = () => {
       ? [
         {
           id: 6,
-          accessorKey: "action",
-          header: "Action",
+          accessorKey: "convert_to_enquiry",
+          header: "Convert to Enquiry",
           Cell: ({ row }) => (
             <Box sx={{ display: "flex", gap: 1 }}>
               <Button
@@ -666,6 +700,24 @@ const Lead = () => {
         },
       ]
       : []),
+    ...(hasFullAccess ? [
+      {
+        id: 6,
+        accessorKey: "action",
+        header: "Action",
+        Cell: ({ row }) => (
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <IconButton
+              size="small"
+              color="error"
+              onClick={() => handleDelete(row.original)}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        ),
+      },
+    ] : [])
   ];
 
   const column2 = [
@@ -689,22 +741,24 @@ const Lead = () => {
     { id: 3, accessorKey: "last_followup_date", header: "Last Followup Date" },
     { id: 4, accessorKey: "converted_date", header: "Converted Date" },
     { id: 5, accessorKey: "company_details", header: "Remarks" },
-    {
-      id: 6,
-      accessorKey: "action",
-      header: "Action",
-      Cell: ({ row }) => (
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <IconButton
-            size="small"
-            color="error"
-            onClick={() => handleDelete(row.original)}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Box>
-      ),
-    },
+    ...(hasFullAccess ? [
+      {
+        id: 6,
+        accessorKey: "action",
+        header: "Action",
+        Cell: ({ row }) => (
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <IconButton
+              size="small"
+              color="error"
+              onClick={() => handleDelete(row.original)}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        ),
+      },
+    ] : [])
   ];
 
   const handleTabChange = (event, newValue) => {
@@ -773,7 +827,7 @@ const Lead = () => {
             </TabPanel>
           </Tabs>
           <DeleteModal
-            title={"converted Data"}
+            title={""}
             modalOpen={modalOpen}
             setModalOpen={() => setModalOpen((prev) => !prev)}
             handleDeleteData={handleDeleteData}

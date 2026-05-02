@@ -45,8 +45,7 @@ export const Header = () => {
           </Typography>
         </Breadcrumbs>
 
-        {hasFullAccess && (
-          <Box>
+        <Box>
             <Button
               variant="contained"
               size="small"
@@ -57,7 +56,6 @@ export const Header = () => {
               New Customer
             </Button>
           </Box>
-        )}
       </Box>
     </>
   );

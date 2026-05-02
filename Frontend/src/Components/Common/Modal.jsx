@@ -30,7 +30,7 @@ export default function DeleteModal({
           </h4>
 
           <p id="parent-modal-description" className="modal-description">
-            {`Are you sure you want to delete this ${title}?`}
+            {`Are you sure you want to delete this ${title ? title : "item"}?`}
           </p>
           <ModalActions>
             <CancelButton onClick={setModalOpen}>Cancel</CancelButton>

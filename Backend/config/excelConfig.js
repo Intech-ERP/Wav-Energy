@@ -13,7 +13,8 @@ module.exports = {
       { header: "Action", key: "action", width: 20 },
       { header: "Company details", key: "company_details", width: 20 },
       { header: "Last Followup Date", key: "last_followup_date", width: 20 },
-      { header: "Next Followup Date", key: "next_followup_date", width: 20 },
+      // { header: "Next Followup Date", key: "next_followup_date", width: 20 },
+      { header: "Enquiry Date", key: "enquiry_date", width: 20 },
     ],
   },
 
@@ -30,6 +31,7 @@ module.exports = {
       { header: "Website", key: "website", width: 20 },
       { header: "Next Followup Date", key: "next_followup_date", width: 20 },
       { header: "Last Followup Date", key: "last_followup_date", width: 20 },
+      { header: "Converted Date", key: "converted_date", width: 20 },
       { header: "company Details", key: "company_details", width: 20 },
     ],
   },

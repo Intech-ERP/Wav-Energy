@@ -13,7 +13,7 @@ import {
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { data, useLocation, useNavigate } from "react-router-dom";
 import { Link as RouterLink } from "react-router-dom";
 import {
@@ -29,6 +29,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { showError, showSuccess } from "../../Services/alert";
 import { useFetchCompanyId } from "../../Hooks/useFetchCompanyId";
 import { State as IndiaState } from "country-state-city";
+import { fetchData } from "../../Services/fetchData";
 
 const formFields = [
   { lable: "Company ID", type: "number", name: "company_id", require: true },
@@ -76,7 +77,7 @@ const formFields = [
   },
   {
     lable: "Nature of Biz",
-    type: "text",
+    type: "select",
     name: "nature_of_biz",
     require: false,
   },
@@ -234,6 +235,52 @@ const Customer = () => {
   const [lead_type, setLead_type] = useState([]);
   const contactRef = useRef(null);
   const navigate = useNavigate();
+
+  const useFetchMultiple = (urls) => {
+    const [datas, setData] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+      const fetchAll = async () => {
+        try {
+          setLoading(true);
+          setError("");
+
+          const responses = await Promise.all(
+            Object.entries(urls).map(async ([key, url]) => {
+              const res = await fetchData(url);
+
+              const sortedData = res.sort(
+                (a, b) =>
+                  new Date(a.disp_order) - new Date(b.disp_order)
+              );
+
+              return [key, sortedData];
+            })
+          );
+
+          const formattedData = Object.fromEntries(responses);
+          setData(formattedData);
+
+        } catch (err) {
+          console.error("Parallel fetch error:", err);
+          setError(err?.message || "Failed to fetch multiple data");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchAll();
+    }, [urls]);
+
+    return { datas, loading, error };
+  };
+
+  const urls = useMemo(() => ({
+    nature_of_biz: "/natureofBusiness",
+  }), []);
+
+  const { datas, loading, error } = useFetchMultiple(urls);
 
   const { state } = useLocation();
   const editData = state?.editData;
@@ -482,7 +529,7 @@ const Customer = () => {
 
                       {field.name !== "country" &&
                         field.name !== "state" &&
-                        field.name !== "company_id" && (
+                        field.name !== "company_id" && field.name !== 'nature_of_biz' && (
                           <Controller
                             name={field.name}
                             control={control}
@@ -503,6 +550,41 @@ const Customer = () => {
                             )}
                           />
                         )}
+
+                      {field.name === 'nature_of_biz' && field.type === 'select' && (
+                        <Controller
+                          name={field.name}
+                          control={control}
+                          rules={{
+                            required: field.required
+                              ? `${field.label} is required`
+                              : false,
+                          }}
+                          render={({ field: controllerField, fieldState }) => {
+                            return (
+                              <TextField
+                                {...controllerField}
+                                size="small"
+                                fullWidth
+                                select
+                                value={controllerField.value ?? ""}
+                                error={!!fieldState.error}
+                                helperText={fieldState.error?.message}
+                              >
+                                <MenuItem value="" disabled>
+                                  -- Select --
+                                </MenuItem>
+
+                                {datas.nature_of_biz?.map((option) => (
+                                  <MenuItem key={option.nature_of_business} value={option.nature_of_business}>
+                                    {option.nature_of_business}
+                                  </MenuItem>
+                                ))}
+                              </TextField>
+                            );
+                          }}
+                        />
+                      )}
                     </FormControl>
                   )}
                 </Grid>

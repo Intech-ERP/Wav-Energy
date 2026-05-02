@@ -5,7 +5,8 @@ const enquiryGenerateModel = require("../models/enquiryGenerate.model");
 
 const generateExcel = async (menu, data) => {
   const config = excelConfig[menu];
-  console.log("data", data);
+  console.log("Excel config for menu:", menu, config);
+  // console.log("data", data);
   if (!config) {
     throw new Error("Invalid menu type");
   }
@@ -90,6 +91,7 @@ exports.generateReport = async (req, res) => {
           $lte: to,
         },
       });
+      console.log("Enquiry data fetched for Excel:", result);
       if (result.length === 0) {
         return res
           .status(400)

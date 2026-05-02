@@ -12,8 +12,10 @@ const operationMaster = require("./routes/operationMaster.routes.js");
 const leadTypeMaster = require("./routes/leadTypeMaster.routes.js");
 const leadSourceMaster = require("./routes/leadSourceMaster.routes.js");
 const nextActionMaster = require("./routes/nextActionMaster.routes.js");
+const natureofBusinessMaster = require("./routes/natureofBusinessMaster.routes.js");
 const userRouter = require("./routes/user.routes.js");
 const excelReportRouter = require("./routes/excelReportGenerate.routes.js");
+const authMiddleware = require("./middleware/authMiddleware.js");
 
 const app = express();
 
@@ -35,6 +37,7 @@ app.use("/api", operationMaster);
 app.use("/api", leadTypeMaster);
 app.use("/api", leadSourceMaster);
 app.use("/api", nextActionMaster);
+app.use("/api", natureofBusinessMaster);
 app.use("/api", userRouter);
 app.use("/api", excelReportRouter);
 

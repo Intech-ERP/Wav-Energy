@@ -54,8 +54,7 @@ export const Header = () => {
           </Typography>
         </Breadcrumbs>
 
-        {hasFullAccess && (
-          <Button
+        <Button
             variant="contained"
             size="small"
             startIcon={<AddCircleOutlinedIcon />}
@@ -64,7 +63,6 @@ export const Header = () => {
           >
             Generate Enquiry
           </Button>
-        )}
       </Box>
     </>
   );

@@ -10,6 +10,7 @@ import OperationAndMaintenance from "./operationAndMaintenance";
 import LeadType from "./LeadType";
 import LeadSource from "./LeadSource";
 import NextAction from "./NextAction";
+import NatureOfBusinessMaster from "./natureofBusinessMaster";
 
 const tablist = [
   { label: "Adivisory", value: "advisory" },
@@ -18,6 +19,7 @@ const tablist = [
   { label: "Lead Type", value: "lead_type" },
   { label: "Lead Source", value: "lead_source" },
   { label: "Next Action", value: "next_action" },
+  { label: "Nature of business", value: "nature_of_business" },
 ];
 
 export const Header = ({ tabValue, handleAddData }) => {
@@ -48,8 +50,7 @@ export const Header = ({ tabValue, handleAddData }) => {
             Lead Master
           </Typography>
         </Breadcrumbs>
-        {hasFullAccess && (
-          <Box>
+        <Box>
             <Button
               variant="contained"
               size="small"
@@ -57,10 +58,9 @@ export const Header = ({ tabValue, handleAddData }) => {
               sx={{ borderRadius: 0, textTransform: "none" }}
               onClick={handleAddData}
             >
-              Add {tabValue === 'lead_type' ? 'Lead Type' : tabValue === 'lead_source' ? 'Lead Source' : tabValue === 'next_action' ? 'Next Action' : tabValue}
+              Add {tabValue === 'lead_type' ? 'Lead Type' : tabValue === 'lead_source' ? 'Lead Source' : tabValue === 'next_action' ? 'Next Action' : tabValue === 'nature_of_business' ? 'Nature of Business' : tabValue}
             </Button>
           </Box>
-        )}
       </Box>
     </>
   );
@@ -169,6 +169,13 @@ const LeadMaster = () => {
           </TabPanel>
           <TabPanel value={"next_action"}>  
             <NextAction
+              tabValue={tabValue}
+              refreshKey={refreshKey}
+              onEditData={handleEditData}
+            />
+          </TabPanel>
+          <TabPanel value={"nature_of_business"}>  
+            <NatureOfBusinessMaster
               tabValue={tabValue}
               refreshKey={refreshKey}
               onEditData={handleEditData}

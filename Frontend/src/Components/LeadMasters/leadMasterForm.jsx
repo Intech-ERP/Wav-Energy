@@ -44,11 +44,12 @@ const LeadMasterForm = ({
 
   const handleSubmitData = async (data) => {
     console.log("submitted data", data);
+    const tab = tabValue === 'nature_of_business' ? 'natureofBusiness' : tabValue
     try {
-      const response = await addLeadMaster(tabValue, data);
+      const response = await addLeadMaster(tab, data);
       if (response.success) {
         reset();
-        showSuccess(`${tabValue} Added Successfully!`);
+        showSuccess(`${tab === 'natureofBusiness' ? 'Nature of Business' : tab} Added Successfully!`);
         onClose();
         setIsAdvisoryAdded();
       }
@@ -60,11 +61,11 @@ const LeadMasterForm = ({
     }
   };
   const handleUpdateData = async (data) => {
-    console.log("update data", data);
+    const tab = tabValue === 'nature_of_business' ? "NatureofBusiness" : tabValue
     try {
-      const response = await updateLeadMaster(data, tabValue);
+      const response = await updateLeadMaster(data, tab);
       if (response.success) {
-        showSuccess(`${tabValue} data Updated Successfully!`);
+        showSuccess(`${tab === "NatureofBusiness" ? "Nature of Business" : tab} data Updated Successfully!`);
         reset();
         onClose();
         setIsAdvisoryAdded();
@@ -119,7 +120,7 @@ const LeadMasterForm = ({
               : tabValue === "lead_source"
               ? "Lead Source"
               : tabValue === "next_action"
-                ? "Next Action": tabValue}`}
+                ? "Next Action": tabValue === 'nature_of_business' ? 'Nature of Business' : tabValue}`}
           </Typography>
           <IconButton sx={{ ml: 2 }} onClick={handleClose}>
             <CloseIcon sx={{ color: "#0072BC" }} />
@@ -136,7 +137,7 @@ const LeadMasterForm = ({
             <Grid container>
               <Grid size={{ xs: 12 }} sx={{ mb: 1 }}>
                 <Typography variant="body1" sx={{ fontSize: "15px" }}>
-                  {`Add ${tabValue === "lead_type" ? "Lead Type" : tabValue === "lead_source" ? "Lead Source" : tabValue === "next_action" ? "Next Action" : tabValue}`}
+                  {`Add ${tabValue === "lead_type" ? "Lead Type" : tabValue === "lead_source" ? "Lead Source" : tabValue === "next_action" ? "Next Action" : tabValue === 'nature_of_business' ? 'Nature of Business' : tabValue}`}
                 </Typography>
               </Grid>
               <Grid size={{ xs: 12 }}>

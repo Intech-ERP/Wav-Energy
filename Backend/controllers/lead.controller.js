@@ -167,7 +167,7 @@ exports.removeConvertedLead = async (req, res) => {
     const { id } = req.params;
     console.log("remove converted lead running");
     const result = await leadModel.findOneAndUpdate(
-      { lead_id: id, status: 1 },
+      { lead_id: id},
       { $set: { status: 0 } }
     );
 

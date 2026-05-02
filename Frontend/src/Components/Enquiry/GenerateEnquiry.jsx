@@ -19,6 +19,7 @@ import { useFetchData } from "../../Hooks/useFetchData";
 import { getContactsById } from "../../Services/contact.service";
 import { showError } from "../../Services/alert";
 import { State } from "country-state-city";
+import { fetchData } from "../../Services/fetchData";
 
 export const Header = ({ isEditMode, isConvertToEnquiry }) => {
   return (
@@ -89,7 +90,53 @@ const GenerateEnquiry = () => {
   const [states, setStates] = useState([]);
   const { data = [], refetch } = useFetchData("/customers");
 
-  console.log("customer data", data);
+  const useFetchMultiple = (urls) => {
+      const [datas, setData] = useState({});
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState("");
+  
+      useEffect(() => {
+        const fetchAll = async () => {
+          try {
+            setLoading(true);
+            setError("");
+  
+            const responses = await Promise.all(
+              Object.entries(urls).map(async ([key, url]) => {
+                const res = await fetchData(url);
+  
+                const sortedData = res.sort(
+                  (a, b) =>
+                    new Date(a.disp_order) - new Date(b.disp_order)
+                );
+  
+                return [key, sortedData];
+              })
+            );
+  
+            const formattedData = Object.fromEntries(responses);
+            setData(formattedData);
+  
+          } catch (err) {
+            console.error("Parallel fetch error:", err);
+            setError(err?.message || "Failed to fetch multiple data");
+          } finally {
+            setLoading(false);
+          }
+        };
+        fetchAll();
+      }, [urls]);
+  
+      return { datas, loading, error };
+    };
+  
+    const urls = useMemo(() => ({
+      nature_of_biz: "/natureofBusiness",
+    }), []);
+  
+    const { datas, loading, error } = useFetchMultiple(urls);
+
+    console.log('natureofBusiness',datas)
 
   const { state } = useLocation();
 
@@ -127,10 +174,13 @@ const GenerateEnquiry = () => {
       group_name: item.group_name,
       branch_div: item.branch_div,
       gst_number: item.gst_number,
+      nature_of_biz: item.nature_of_biz,
       email: item.email,
       website: item.website,
       address_line_1: item.address_line_1,
       address_line_2: item.address_line_2,
+      taluka: item.taluka,
+      district: item.district,
       country: item.country,
       state: item.state,
       pincode: item.pincode,
@@ -231,10 +281,21 @@ const GenerateEnquiry = () => {
       });
       setValue("branch_div", matchedCompany.branch_div || "");
       setValue("gst_number", matchedCompany.gst_number || "");
+      setValue("nature_of_biz", matchedCompany.nature_of_biz || "");
       setValue("email", matchedCompany.email || "");
       setValue("website", matchedCompany.website || "");
       setValue("address_line_1", matchedCompany.address_line_1 || "");
       setValue("address_line_2", matchedCompany.address_line_2 || "");
+      setValue("taluka", matchedCompany.taluka,{
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: false,
+      });
+      setValue("district", matchedCompany.district,{
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: false,
+      });
       setValue("country", matchedCompany.country || "");
       setValue("state", matchedCompany.state || "");
       setValue("pincode", matchedCompany.pincode || "");
@@ -627,8 +688,40 @@ const GenerateEnquiry = () => {
                           );
                         }}
                       />
-                    ) : (
-                      field.name !== "mobile_no" && (
+                    ) : field.type === 'select' && field.name === 'nature_of_biz' ? (
+                      <Controller
+                        name={field.name}
+                        control={control}
+                        rules={{
+                          required: field.required
+                            ? `${field.label} is required`
+                            : false,
+                        }}
+                        render={({ field: controllerField, fieldState }) => {
+                          return (
+                            <TextField
+                              {...controllerField}
+                              size="small"
+                              fullWidth
+                              select
+                              value={controllerField.value ?? ""}
+                              error={!!fieldState.error}
+                              helperText={fieldState.error?.message}
+                            >
+                              <MenuItem value="" disabled>
+                                -- Select --
+                              </MenuItem>
+
+                              {datas.nature_of_biz?.map((option) => (
+                                <MenuItem key={option.nature_of_business} value={option.nature_of_business}>
+                                  {option.nature_of_business}
+                                </MenuItem>
+                              ))}
+                            </TextField>
+                          );
+                        }}
+                      />
+                    ) : field.name !== "mobile_no" && (
                         <Controller
                           name={field.name}
                           control={control}
@@ -669,7 +762,7 @@ const GenerateEnquiry = () => {
                           }}
                         />
                       )
-                    )}
+                    }
                   </FormControl>
                 </Grid>
               </React.Fragment>
